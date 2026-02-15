@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { TrendingTicker } from '@/components/TrendingTicker'
 import { CategoryColumn, SimpleArticle } from '@/components/CategoryColumn'
-import { MarketSnapshot } from '@/components/MarketSnapshot'
+import { MarketTable } from '@/components/MarketTable'
 import { ProBanner } from '@/components/ProBanner'
 import { Logo } from '@/components/Logo'
 import AdBlock from '@/components/AdBlock'
@@ -143,158 +143,189 @@ export default async function Home() {
   const safeFinance = financeArticles.length > 0 ? financeArticles : await getRecentFallback(4);
 
   return (
-    <main className="min-h-screen bg-[#0B0F14] text-white selection:bg-cyan-500/30 font-sans">
+    <main className="min-h-screen bg-slate-50 text-[#111111] font-sans">
 
       {/* 1. Global Ticker */}
-      <div className="border-b border-white/5 bg-[#050814]">
+      <div className="border-b border-slate-200 bg-white">
         <TrendingTicker />
       </div>
 
       {/* 2. Authority Hero Section */}
-      <section className="relative py-16 md:py-24 text-center border-b border-white/10 bg-[#0B0F14] overflow-hidden">
-        {/* Background Subtle Gradient */}
-        <div className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-[#0B0F14] to-[#0B0F14] z-0" />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay z-0" />
+      <section className="py-16 md:py-20 border-b border-slate-200 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-12 gap-12 items-center">
+            {/* Left Content */}
+            <div className="lg:col-span-7 max-w-3xl">
+              <div className="inline-flex items-center gap-2 mb-6">
+                <span className="w-2 h-2 rounded-full bg-[#0f172a]" />
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                  Global Intelligence Terminal
+                </span>
+              </div>
 
-        <div className="container mx-auto px-4 relative z-10 max-w-6xl animate-in fade-in zoom-in-95 duration-1000">
-          <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 bg-cyan-950/30 border border-cyan-500/30 rounded-full shadow-[0_0_15px_-3px_rgba(6,182,212,0.3)]">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
-            </span>
-            <span className="text-[11px] font-mono text-cyan-300 uppercase tracking-[0.2em] font-bold">Global Intelligence Terminal</span>
-          </div>
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-[#0f172a] leading-[1.05] tracking-tight mb-8">
+                Real-Time <br />
+                Global Intelligence.
+              </h1>
 
-          <h1 className="text-7xl md:text-8xl lg:text-9xl font-black text-white leading-[0.9] uppercase tracking-tighter mb-8 drop-shadow-2xl">
-            <span className="bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">VYTRIXE</span>
-            <br />
-            <span className="text-white">INTEL</span>
-          </h1>
+              <p className="text-xl text-slate-600 mb-10 leading-relaxed max-w-xl">
+                Real-time autonomous reporting on <strong>global markets</strong>, <strong>technology vectors</strong>, and emerging <strong>cultural shifts</strong>.
+              </p>
 
-          <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto mb-10 font-medium leading-relaxed tracking-wide">
-            Real-time autonomous reports on <span className="text-white font-bold">global markets</span>, <span className="text-white font-bold">technology vectors</span>, and emerging <span className="text-white font-bold">cultural shifts</span>.
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-5">
-            <Link href="/topics" className="px-10 py-4 bg-cyan-500 hover:bg-cyan-400 text-black font-black uppercase tracking-wider text-sm transition-all shadow-[0_0_20px_-5px_rgba(6,182,212,0.6)] hover:shadow-[0_0_30px_-5px_rgba(6,182,212,0.8)] hover:scale-105 rounded-sm">
-              Access Intelligence
-            </Link>
-            <Link href="/markets" className="px-10 py-4 bg-transparent border border-white/20 hover:border-white/50 text-white font-black uppercase tracking-wider text-sm hover:bg-white/5 transition-all rounded-sm">
-              Live Markets
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Featured News Grid */}
-      <section className="border-b border-white/10 bg-[#0B0F14] relative z-20 shadow-2xl">
-        <div className="container mx-auto px-4 py-8 md:py-12">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-1.5 bg-cyan-500/10 rounded-lg">
-              <Zap className="h-5 w-5 text-cyan-400" />
+              <div className="flex flex-wrap gap-4">
+                <Link href="/topics" className="px-8 py-3.5 bg-[#0f172a] hover:bg-slate-800 text-white font-semibold text-sm rounded-sm transition-colors shadow-sm">
+                  Access Intelligence
+                </Link>
+                <Link href="/markets" className="px-8 py-3.5 bg-white border border-slate-300 hover:border-slate-800 text-slate-900 font-semibold text-sm rounded-sm transition-all shadow-sm">
+                  Live Markets
+                </Link>
+              </div>
             </div>
-            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-white">Featured Intelligence</h2>
-          </div>
 
-          <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
-            {/* Left: Main Feature (2/3) */}
-            <div className="lg:col-span-2 group cursor-pointer relative hover:scale-[1.01] transition-transform duration-500">
-              <Link href={`/news/${heroArticle.slug}`} className="block h-full">
-                <div className="relative aspect-video w-full overflow-hidden border border-white/20 rounded-xl bg-[#0F131C] shadow-2xl">
+            {/* Right Data Highlight / Featured Image */}
+            <div className="lg:col-span-5">
+              <Link href={`/news/${heroArticle.slug}`} className="block group">
+                <div className="relative aspect-[4/3] bg-slate-100 rounded-md overflow-hidden border border-slate-200 shadow-sm transition-shadow group-hover:shadow-md">
                   <img
                     src={heroArticle.image_url}
                     alt={heroArticle.title}
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 desaturate-50 group-hover:desaturate-0"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#02040A] via-[#02040A]/60 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full">
-                    <Badge className="bg-cyan-500 text-black border-none rounded-none px-3 py-1 text-[11px] font-black uppercase tracking-widest mb-4 shadow-[0_0_15px_-3px_rgba(6,182,212,0.5)]">
-                      Top Story
-                    </Badge>
-                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-[0.95] uppercase italic mb-4 group-hover:text-cyan-400 transition-colors drop-shadow-md">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                  <div className="absolute bottom-0 left-0 p-6">
+                    <span className="inline-block px-2 py-1 bg-white text-xs font-bold uppercase tracking-wider mb-3 text-slate-900 rounded-sm">
+                      Featured
+                    </span>
+                    <h3 className="text-white text-2xl font-bold leading-tight group-hover:underline decoration-white/50 underline-offset-4">
                       {heroArticle.title}
                     </h3>
-                    <p className="text-slate-200 text-lg line-clamp-2 max-w-2xl font-medium leading-relaxed drop-shadow-sm">
-                      {heroArticle.description}
-                    </p>
                   </div>
                 </div>
               </Link>
             </div>
-
-            {/* Right: Stacked (1/3) */}
-            <div className="lg:col-span-1 flex flex-col gap-4">
-              {secondaryFeatured.map((item) => (
-                <Link key={item.id} href={`/news/${item.slug}`} className="group block flex-1">
-                  <div className="h-full p-6 border border-white/10 rounded-xl hover:border-cyan-500/50 bg-white/[0.03] hover:bg-white/[0.06] transition-all duration-300 flex flex-col justify-center shadow-lg hover:shadow-cyan-900/20">
-                    <div className="flex items-center gap-2 mb-3 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
-                      <span className="size-2 bg-red-500 rounded-full animate-pulse" />
-                      <span className="text-cyan-400">Live</span>
-                      <span className="text-slate-600">|</span>
-                      <span>{item.dateDisplay}</span>
-                    </div>
-                    <h4 className="text-lg font-bold text-white leading-tight group-hover:text-cyan-300 transition-colors line-clamp-3">
-                      {item.title}
-                    </h4>
-                  </div>
-                </Link>
-              ))}
-            </div>
           </div>
         </div>
       </section>
 
-      {/* 4. Sector Intelligence */}
-      <section className="py-20 border-b border-white/5 bg-[#0B0F14]">
+      {/* 3. Featured Intelligence Grid */}
+      <section className="py-16 bg-[#f7f8fa] border-b border-slate-200">
         <div className="container mx-auto px-4">
-          <div className="flex items-end justify-between mb-12 pb-4 border-b border-white/5">
-            <h2 className="text-sm font-black uppercase tracking-widest text-white flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-cyan-500" />
-              Sector Intelligence
-            </h2>
-            <Link href="/topics" className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-white transition-colors">
-              View All Sectors
+          <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
+            <h2 className="text-lg font-bold text-[#0f172a]">Featured Intelligence</h2>
+            <Link href="/news" className="text-sm font-semibold text-slate-500 hover:text-slate-900 flex items-center gap-1">
+              View All <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
-            <CategoryColumn category="AI" articles={safeAi} />
-            <CategoryColumn category="Finance" articles={safeFinance} />
-            <CategoryColumn category="Sports" articles={sportsArticles} />
-            <CategoryColumn category="Culture" articles={cultureArticles} />
+          <div className="grid md:grid-cols-3 gap-8">
+            {secondaryFeatured.map((item) => (
+              <Link key={item.id} href={`/news/${item.slug}`} className="group block h-full">
+                <div className="h-full bg-white border border-slate-200 p-6 rounded-md shadow-sm transition-all hover:shadow-md hover:border-slate-300 flex flex-col">
+                  <div className="flex items-center gap-2 mb-4 text-xs font-bold text-slate-400 uppercase tracking-wide">
+                    <span className="text-red-600">● Live</span>
+                    <span>{item.dateDisplay}</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-[#111111] leading-snug mb-3 group-hover:text-blue-700 transition-colors">
+                    {item.title}
+                  </h4>
+                  <p className="text-slate-500 text-sm line-clamp-3 leading-relaxed">
+                    {item.description}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Sector Intelligence (Data Tables style) */}
+      <section className="py-16 bg-white border-b border-slate-200">
+        <div className="container mx-auto px-4">
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold text-[#0f172a] mb-2">Sector Analysis</h2>
+            <p className="text-slate-500">Deep dive into key market verticals.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="space-y-6">
+              <h3 className="font-bold border-b border-slate-200 pb-2 text-sm uppercase tracking-wider text-slate-900">AI & Tech</h3>
+              <div className="flex flex-col gap-4">
+                {safeAi.map(story => (
+                  <Link key={story.id} href={`/news/${story.slug}`} className="group">
+                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-700 leading-snug mb-1">{story.title}</h4>
+                    <p className="text-xs text-slate-400">{story.dateDisplay}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <h3 className="font-bold border-b border-slate-200 pb-2 text-sm uppercase tracking-wider text-slate-900">Finance</h3>
+              <div className="flex flex-col gap-4">
+                {safeFinance.map(story => (
+                  <Link key={story.id} href={`/news/${story.slug}`} className="group">
+                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-700 leading-snug mb-1">{story.title}</h4>
+                    <p className="text-xs text-slate-400">{story.dateDisplay}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <h3 className="font-bold border-b border-slate-200 pb-2 text-sm uppercase tracking-wider text-slate-900">Sports</h3>
+              <div className="flex flex-col gap-4">
+                {sportsArticles.map(story => (
+                  <Link key={story.id} href={`/news/${story.slug}`} className="group">
+                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-700 leading-snug mb-1">{story.title}</h4>
+                    <p className="text-xs text-slate-400">{story.dateDisplay}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <h3 className="font-bold border-b border-slate-200 pb-2 text-sm uppercase tracking-wider text-slate-900">Global</h3>
+              <div className="flex flex-col gap-4">
+                {cultureArticles.map(story => (
+                  <Link key={story.id} href={`/news/${story.slug}`} className="group">
+                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-700 leading-snug mb-1">{story.title}</h4>
+                    <p className="text-xs text-slate-400">{story.dateDisplay}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* 5. Market Snapshot (Bottom) */}
-      <section className="py-20 bg-[#050814]">
+      <section className="py-16 bg-[#f7f8fa]">
         <div className="container mx-auto px-4">
-          <div className="border border-white/10 rounded-xl overflow-hidden bg-[#0B0F14]">
-            <div className="p-4 border-b border-white/10 bg-white/[0.02] flex justify-between items-center">
-              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Global Markets</h3>
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          <div className="mb-8 flex items-end justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-[#0f172a] mb-2">Market Data Terminal</h3>
+              <p className="text-sm text-slate-500">Real-time cross-asset performance metrics.</p>
             </div>
-            <div className="p-8">
-              <MarketSnapshot compact={false} />
-            </div>
+            <span className="text-xs font-mono text-green-600 font-bold bg-green-100 px-2 py-1 rounded-sm">● SYSTEM ONLINE</span>
           </div>
+          <MarketTable />
         </div>
       </section>
 
       <ProBanner />
 
-      <footer className="py-12 border-t border-white/5 bg-[#010205] relative z-10">
-        <div className="container mx-auto px-4 text-center text-slate-600">
-          <div className="flex justify-center items-center gap-2 mb-6 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-            <span className="text-lg font-bold text-white">Vytrixe</span>
-            <span className="text-xs border border-white/20 px-1 rounded text-white/50">INTEL</span>
+      <footer className="py-12 border-t border-slate-200 bg-white">
+        <div className="container mx-auto px-4 text-center text-slate-500">
+          <div className="flex justify-center items-center gap-2 mb-6">
+            <span className="text-lg font-bold text-[#0f172a]">Vytrixe</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest bg-slate-100 px-2 py-0.5 rounded text-slate-600">Intel</span>
           </div>
-          <p className="mb-6 text-sm">© {new Date().getFullYear()} Vytrixe Intelligence. AI-Driven Global News.</p>
-          <div className="flex justify-center gap-8 text-sm font-medium">
-            <Link href="/privacy-policy" className="hover:text-cyan-400 transition-colors">Privacy</Link>
-            <Link href="/terms-of-service" className="hover:text-cyan-400 transition-colors">Terms</Link>
-            <Link href="/contact" className="hover:text-cyan-400 transition-colors">Contact</Link>
-            <Link href="/about" className="hover:text-cyan-400 transition-colors">About</Link>
+          <p className="mb-6 text-sm">© {new Date().getFullYear()} Vytrixe Intelligence.</p>
+          <div className="flex justify-center gap-8 text-sm font-medium text-slate-600">
+            <Link href="/privacy-policy" className="hover:text-[#0f172a] transition-colors">Privacy</Link>
+            <Link href="/terms-of-service" className="hover:text-[#0f172a] transition-colors">Terms</Link>
+            <Link href="/contact" className="hover:text-[#0f172a] transition-colors">Contact</Link>
+            <Link href="/about" className="hover:text-[#0f172a] transition-colors">About</Link>
           </div>
         </div>
       </footer>

@@ -6,6 +6,7 @@ import { TrendingTicker } from "@/components/TrendingTicker";
 import { ExitIntentPopup } from "@/components/ExitIntentPopup";
 import { GlobalFooter } from "@/components/GlobalFooter";
 import { CookieConsent } from "@/components/CookieConsent";
+import { Navbar } from "@/components/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,16 +35,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background text-foreground selection:bg-slate-200 selection:text-slate-900`}
       >
         <TrendingTicker />
+        <Navbar />
         <JsonLd />
-        <main className="min-h-screen flex flex-col">
+        <main className="min-h-screen flex flex-col bg-background">
           {children}
         </main>
-        <ExitIntentPopup />
         <CookieConsent />
         <GlobalFooter />
       </body>

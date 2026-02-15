@@ -26,19 +26,19 @@ export function TrendingTicker() {
     if (trends.length === 0) return null
 
     return (
-        <div className="w-full bg-[#0A0F1F] border-b border-cyan-500/20 py-2 overflow-hidden whitespace-nowrap sticky top-0 z-[100] backdrop-blur-md bg-opacity-80">
-            <div className="inline-flex items-center gap-4 animate-ticker px-4">
+        <div className="w-full bg-slate-50 border-b border-slate-200 py-2.5 overflow-hidden whitespace-nowrap sticky top-0 z-[100] backdrop-blur-md bg-opacity-95 text-xs font-medium">
+            <div className="inline-flex items-center gap-6 animate-ticker px-4">
                 {/* Double the content for seamless loop */}
                 {[...trends, ...trends].map((trend, i) => (
                     <div key={i} className="inline-flex items-center gap-2 group cursor-pointer">
-                        <TrendingUp className="h-3 w-3 text-cyan-500" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-cyan-400 transition-colors">
+                        <TrendingUp className="h-3 w-3 text-blue-600" />
+                        <span className="font-bold uppercase tracking-wider text-slate-700 group-hover:text-blue-700 transition-colors">
                             {(trend.seo_title || 'Intelligence').split('|')[0]}
                         </span>
-                        <span className="text-[10px] text-cyan-500/50 font-mono">
-                            +98.5%
+                        <span className="text-green-600 font-mono">
+                            +1.2%
                         </span>
-                        <span className="mx-4 text-slate-800">|</span>
+                        <span className="mx-2 text-slate-300">|</span>
                     </div>
                 ))}
             </div>

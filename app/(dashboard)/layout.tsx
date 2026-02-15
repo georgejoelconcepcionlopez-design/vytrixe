@@ -17,7 +17,7 @@ export default async function DashboardLayout({
     return (
         <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
             {/* Navbar */}
-            <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b border-border bg-card px-6 shadow-sm">
+            <header className="flex h-16 items-center gap-4 border-b border-border bg-card px-6 shadow-sm">
                 <Link className="flex items-center gap-2 transition-opacity hover:opacity-80" href="/">
                     <Logo variant="default" size="md" />
                 </Link>
