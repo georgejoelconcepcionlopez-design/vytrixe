@@ -17,15 +17,6 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    useState(() => {
-        const checkAuth = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (user) {
-                router.push('/admin')
-            }
-        }
-        checkAuth()
-    })
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()

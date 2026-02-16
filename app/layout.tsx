@@ -46,6 +46,7 @@ export default function RootLayout({
           {children}
         </main>
         <CookieConsent />
+        <ExitIntentPopup />
         <GlobalFooter />
       </body>
     </html>

@@ -13,32 +13,27 @@ export function ExitIntentPopup() {
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
     useEffect(() => {
-        const hasSeen = sessionStorage.getItem('vytrixe_popup_seen')
-        if (hasSeen) return
+        // Check if already seen/closed
+        const isClosed = localStorage.getItem('vytrixe_promo_popup_closed')
+        if (isClosed) return
 
-        let timer: NodeJS.Timeout
         const handleMouseOut = (e: MouseEvent) => {
             if (e.clientY <= 0) {
-                // Delay activation by 5s once intent detected (user request specified 5s delay BEFORE activation)
-                // Actually, "5-second delay before activation" likely means "don't show for the first 5 seconds of the session"
-                // OR "wait 5s after intent detected". Standard exit intent is instant.
-                // Interpreting as: Don't show until user has been on page for 5s.
-                timer = setTimeout(() => {
-                    setIsVisible(true)
-                }, 500) // Small delay for UX
+                setIsVisible(true)
             }
         }
 
-        const sessionTimer = setTimeout(() => {
-            document.addEventListener('mouseout', handleMouseOut)
-        }, 5000)
+        document.addEventListener('mouseout', handleMouseOut)
 
         return () => {
-            clearTimeout(sessionTimer)
-            clearTimeout(timer)
             document.removeEventListener('mouseout', handleMouseOut)
         }
     }, [])
+
+    const handleClose = () => {
+        setIsVisible(false)
+        localStorage.setItem('vytrixe_promo_popup_closed', 'true')
+    }
 
     const handleSubscribe = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -54,7 +49,7 @@ export function ExitIntentPopup() {
             if (error) throw error
 
             setStatus('success')
-            sessionStorage.setItem('trendnova_popup_seen', 'true')
+            localStorage.setItem('vytrixe_promo_popup_closed', 'true')
             setTimeout(() => setIsVisible(false), 2000)
         } catch (err) {
             setStatus('error')
@@ -67,10 +62,7 @@ export function ExitIntentPopup() {
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
             <div className="relative w-full max-w-sm bg-[#050A18] border border-cyan-500/30 rounded-3xl p-8 shadow-2xl shadow-cyan-500/10 animate-in fade-in zoom-in duration-300">
                 <button
-                    onClick={() => {
-                        setIsVisible(false)
-                        sessionStorage.setItem('vytrixe_popup_seen', 'true')
-                    }}
+                    onClick={handleClose}
                     className="absolute top-4 right-4 p-1 text-slate-500 hover:text-white transition-colors"
                 >
                     <X className="h-5 w-5" />
