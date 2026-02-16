@@ -9,7 +9,6 @@ import {
   TrendingUp,
   ExternalLink
 } from 'lucide-react'
-import { TrendingTicker } from '@/components/TrendingTicker'
 import { CategoryColumn, SimpleArticle } from '@/components/CategoryColumn'
 import { MarketTable } from '@/components/MarketTable'
 import { ProBanner } from '@/components/ProBanner'
@@ -48,15 +47,64 @@ export const metadata: Metadata = {
   },
 }
 
+
 const DEFAULT_HERO: SimpleArticle = {
   id: 'default-hero',
-  slug: 'welcome-vytrixe',
-  title: 'Vytrixe Intelligence: Global Markets Live',
-  description: 'Real-time autonomous reporting on global markets, technology vectors, and emerging cultural shifts.',
-  image_url: 'https://images.unsplash.com/photo-1639322537228-f710d846310a?auto=format&fit=crop&q=80&w=800',
+  slug: 'nvidia-blackwell-demand-surge',
+  title: 'NVIDIA Blackwell Demand "Insane": Shares Hit All-Time High',
+  description: 'Jensen Huang confirms next-gen AI chips are sold out for 12 months as sovereign AI race accelerates globally.',
+  image_url: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80&w=800',
   created_at: new Date().toISOString(),
   dateDisplay: 'LIVE NOW'
 };
+
+const MOCK_AI_ARTICLES: SimpleArticle[] = [
+  {
+    id: 'mock-1',
+    slug: 'openai-sora-public-release',
+    title: 'OpenAI Sets Release Date for Sora Video Model',
+    description: 'Hollywood studios panic as AI video generation reaches near-photorealistic quality with consistent physics.',
+    image_url: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=800',
+    created_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+    dateDisplay: '1h ago'
+  },
+  {
+    id: 'mock-2',
+    slug: 'humanoid-robots-bmw-factory',
+    title: 'Figure AI Robots Deploy in BMW Factories',
+    description: 'First commercial deployment of general-purpose humanoids marks a shift in industrial automation.',
+    image_url: 'https://images.unsplash.com/photo-1485827404703-89f552507387?auto=format&fit=crop&q=80&w=800',
+    created_at: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
+    dateDisplay: '2h ago'
+  },
+  {
+    id: 'mock-3',
+    slug: 'apple-vision-pro-2-leaks',
+    title: 'Apple Vision Pro 2: Brain-Computer Interface Rumored',
+    description: 'Patents suggest neural inputs could replace hand gestures in the next generation headset.',
+    image_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800',
+    created_at: new Date(Date.now() - 10800000).toISOString(), // 3 hours ago
+    dateDisplay: '3h ago'
+  },
+  {
+    id: 'mock-4',
+    slug: 'spacex-starship-mars-timeline',
+    title: 'SpaceX Starship: Mars Landing Target 2029',
+    description: 'Musk accelerates timeline following successful orbital transfer tests and booster catches.',
+    image_url: 'https://images.unsplash.com/photo-1541185933-710f50b90858?auto=format&fit=crop&q=80&w=800',
+    created_at: new Date(Date.now() - 14400000).toISOString(), // 4 hours ago
+    dateDisplay: '4h ago'
+  },
+  {
+    id: 'mock-5',
+    slug: 'quantum-computing-breakthrough-google',
+    title: 'Google Claims Quantum Error Correction Milestone',
+    description: 'New Sycamore chip reduces noise by 40%, paving the way for stable qubits.',
+    image_url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=800',
+    created_at: new Date(Date.now() - 18000000).toISOString(),
+    dateDisplay: '5h ago'
+  }
+];
 
 export default async function Home() {
   const supabase = await createClient()
@@ -132,23 +180,18 @@ export default async function Home() {
   // Fallback for categories if empty
   const getRecentFallback = async (limit = 3) => {
     const { data } = await supabase.from('trend_articles').select('*').order('created_at', { ascending: false }).limit(limit);
-    return data ? data.map(mapToSimpleArticle) : [];
+    return data && data.length > 0 ? data.map(mapToSimpleArticle) : MOCK_AI_ARTICLES.slice(0, limit);
   }
 
   // Secondary Featured Grid (Right side of hero)
   const secondaryFeatured = await getRecentFallback(3);
 
   // Safe fallbacks
-  const safeAi = aiArticles.length > 0 ? aiArticles : await getRecentFallback(4);
+  const safeAi = aiArticles.length > 0 ? aiArticles : MOCK_AI_ARTICLES.slice(0, 4);
   const safeFinance = financeArticles.length > 0 ? financeArticles : await getRecentFallback(4);
 
   return (
     <main className="min-h-screen bg-slate-50 text-[#111111] font-sans">
-
-      {/* 1. Global Ticker */}
-      <div className="border-b border-slate-200 bg-white">
-        <TrendingTicker />
-      </div>
 
       {/* 2. Authority Hero Section */}
       <section className="py-16 md:py-20 border-b border-slate-200 bg-white">

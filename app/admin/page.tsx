@@ -16,21 +16,28 @@ import {
 import Link from 'next/link';
 
 export default function AdminDashboard() {
+    const [mounted, setMounted] = useState(false);
     const [news, setNews] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [syncing, setSyncing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
+    // Prevent Hydration Mismatch
     useEffect(() => {
+        setMounted(true);
         fetchNews();
     }, []);
 
     const fetchNews = async () => {
+        setLoading(true);
         try {
             const response = await fetch('/api/admin/news/list');
+            if (!response.ok) throw new Error('Failed to fetch news');
             const data = await response.json();
-            setNews(data);
+            setNews(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error('Failed to fetch news');
+            console.error('Failed to fetch news:', error);
+            setError('Could not load intelligence feed.');
         } finally {
             setLoading(false);
         }
@@ -40,15 +47,37 @@ export default function AdminDashboard() {
         setSyncing(true);
         try {
             const resp = await fetch('/api/news/sync?key=DEV_ADMIN_KEY', { method: 'POST' });
+            if (!resp.ok) throw new Error('Sync failed');
             const data = await resp.json();
-            alert(`Sync Complete: ${data.results.imported} imported, ${data.results.skipped} skipped.`);
+            // Use window.alert inside event handler (safe in client)
+            if (typeof window !== 'undefined') {
+                alert(`Sync Complete: ${data.results?.imported || 0} imported, ${data.results?.skipped || 0} skipped.`);
+            }
             fetchNews();
         } catch (error) {
-            alert('Sync failed');
+            if (typeof window !== 'undefined') {
+                alert('Sync failed. Check console for details.');
+            }
         } finally {
             setSyncing(false);
         }
     };
+
+    // Safe Loading State
+    if (!mounted) return <div className="min-h-screen bg-[#02040A] text-white p-8 animate-pulse">Loading Admin Dashboard...</div>;
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-[#02040A] text-white p-8 flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-red-500 mb-4">{error}</p>
+                    <Button onClick={fetchNews} variant="outline" className="border-white/10 text-white hover:bg-white/5">
+                        Retry Connection
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#02040A] text-white p-8">
@@ -61,7 +90,7 @@ export default function AdminDashboard() {
                     <div className="flex gap-4">
                         <Button onClick={handleSync} disabled={syncing} className="bg-cyan-500 hover:bg-cyan-400 text-black font-bold">
                             <RefreshCw className={`mr-2 h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
-                            Update News
+                            {syncing ? 'Syncing...' : 'Update News'}
                         </Button>
                         <Button variant="outline" className="border-white/10 text-white hover:bg-white/5">
                             <Plus className="mr-2 h-4 w-4" />
@@ -88,7 +117,7 @@ export default function AdminDashboard() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-black">
-                                {news.reduce((acc, curr) => acc + (curr.views || 0), 0)}
+                                {news.reduce((acc, curr) => acc + (curr.views || 0), 0).toLocaleString()}
                             </div>
                         </CardContent>
                     </Card>
