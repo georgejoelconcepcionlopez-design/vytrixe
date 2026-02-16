@@ -36,13 +36,13 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    if (request.nextUrl.pathname.startsWith('/admin') && !user) {
-        return NextResponse.redirect(new URL('/login', request.url))
-    }
+    // if (request.nextUrl.pathname.startsWith('/admin') && !user) {
+    //    return NextResponse.redirect(new URL('/login', request.url))
+    // }
 
-    if (request.nextUrl.pathname.startsWith('/login') && user) {
-        return NextResponse.redirect(new URL('/admin', request.url))
-    }
+    // if (request.nextUrl.pathname.startsWith('/login') && user) {
+    //    return NextResponse.redirect(new URL('/', request.url))
+    // }
 
     return supabaseResponse
 }

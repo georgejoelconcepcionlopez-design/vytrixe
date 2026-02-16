@@ -26,7 +26,7 @@ export function Navbar() {
         { name: "Reports", href: "/reports", icon: null },
         { name: "Intelligence", href: "/intel", icon: null },
         { name: "Games", href: "/games", icon: null },
-        { name: "Admin", href: "/admin", icon: null },
+        // { name: "Admin", href: "/admin", icon: null },
     ]
 
     return (
