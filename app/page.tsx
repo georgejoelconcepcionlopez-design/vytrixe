@@ -9,12 +9,14 @@ import {
   TrendingUp,
   ExternalLink
 } from 'lucide-react'
-import { CategoryColumn, SimpleArticle } from '@/components/CategoryColumn'
+import { CategoryColumn } from '@/components/CategoryColumn'
 import { MarketTable } from '@/components/MarketTable'
 import { ProBanner } from '@/components/ProBanner'
 import { Logo } from '@/components/Logo'
 import AdBlock from '@/components/AdBlock'
 import { Metadata } from 'next'
+import { ContentItem } from '@/types/content'
+import { HERO_ARTICLE, AI_ARTICLES, FINANCE_ARTICLES, REPORT_ARTICLES } from '@/data/content'
 
 export const metadata: Metadata = {
   title: "Vytrixe | Real-Time Global Trend Intelligence AI",
@@ -48,73 +50,16 @@ export const metadata: Metadata = {
 }
 
 
-const DEFAULT_HERO: SimpleArticle = {
-  id: 'default-hero',
-  slug: 'nvidia-blackwell-demand-surge',
-  title: 'NVIDIA Blackwell Demand "Insane": Shares Hit All-Time High',
-  description: 'Jensen Huang confirms next-gen AI chips are sold out for 12 months as sovereign AI race accelerates globally.',
-  image_url: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80&w=800',
-  created_at: new Date().toISOString(),
-  dateDisplay: 'LIVE NOW'
-};
-
-const MOCK_AI_ARTICLES: SimpleArticle[] = [
-  {
-    id: 'mock-1',
-    slug: 'openai-sora-public-release',
-    title: 'OpenAI Sets Release Date for Sora Video Model',
-    description: 'Hollywood studios panic as AI video generation reaches near-photorealistic quality with consistent physics.',
-    image_url: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=800',
-    created_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-    dateDisplay: '1h ago'
-  },
-  {
-    id: 'mock-2',
-    slug: 'humanoid-robots-bmw-factory',
-    title: 'Figure AI Robots Deploy in BMW Factories',
-    description: 'First commercial deployment of general-purpose humanoids marks a shift in industrial automation.',
-    image_url: 'https://images.unsplash.com/photo-1485827404703-89f552507387?auto=format&fit=crop&q=80&w=800',
-    created_at: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
-    dateDisplay: '2h ago'
-  },
-  {
-    id: 'mock-3',
-    slug: 'apple-vision-pro-2-leaks',
-    title: 'Apple Vision Pro 2: Brain-Computer Interface Rumored',
-    description: 'Patents suggest neural inputs could replace hand gestures in the next generation headset.',
-    image_url: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800',
-    created_at: new Date(Date.now() - 10800000).toISOString(), // 3 hours ago
-    dateDisplay: '3h ago'
-  },
-  {
-    id: 'mock-4',
-    slug: 'spacex-starship-mars-timeline',
-    title: 'SpaceX Starship: Mars Landing Target 2029',
-    description: 'Musk accelerates timeline following successful orbital transfer tests and booster catches.',
-    image_url: 'https://images.unsplash.com/photo-1541185933-710f50b90858?auto=format&fit=crop&q=80&w=800',
-    created_at: new Date(Date.now() - 14400000).toISOString(), // 4 hours ago
-    dateDisplay: '4h ago'
-  },
-  {
-    id: 'mock-5',
-    slug: 'quantum-computing-breakthrough-google',
-    title: 'Google Claims Quantum Error Correction Milestone',
-    description: 'New Sycamore chip reduces noise by 40%, paving the way for stable qubits.',
-    image_url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=800',
-    created_at: new Date(Date.now() - 18000000).toISOString(),
-    dateDisplay: '5h ago'
-  }
-];
-
 export default async function Home() {
   const supabase = await createClient()
 
-  // --- Helper: Map DB result to SimpleArticle ---
-  const mapToSimpleArticle = (item: any): SimpleArticle => ({
+  // --- Helper: Map DB result to ContentItem ---
+  const mapToContentItem = (item: any): ContentItem => ({
     id: item.id,
     slug: item.trend_id || item.slug,
     title: item.seo_title?.split('|')[0]?.trim() || item.title || 'Intelligence Report',
-    description: item.seo_description || item.excerpt || 'Market intelligence briefing.',
+    summary: item.seo_description || item.excerpt || 'Market intelligence briefing.',
+    category: (item.category?.name || 'Global') as any, // Simple cast for now
     image_url: item.image_url || 'https://images.unsplash.com/photo-1639322537228-f710d846310a?auto=format&fit=crop&q=80&w=800',
     created_at: item.created_at,
     dateDisplay: new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
@@ -123,7 +68,7 @@ export default async function Home() {
   // --- Data Fetching Strategies ---
 
   // 1. Featured Hero (Latest Trending)
-  const fetchHero = async () => {
+  const fetchHero = async (): Promise<ContentItem | null> => {
     // Try 'news' table first
     const { data: newsItems } = await (supabase as any)
       .from('news')
@@ -132,7 +77,7 @@ export default async function Home() {
       .order('created_at', { ascending: false })
       .limit(1);
 
-    if (newsItems && newsItems.length > 0) return mapToSimpleArticle(newsItems[0]);
+    if (newsItems && newsItems.length > 0) return mapToContentItem(newsItems[0]);
 
     // Fallback to 'trend_articles'
     const { data: trendItems } = await supabase
@@ -141,12 +86,12 @@ export default async function Home() {
       .order('score', { ascending: false })
       .limit(1);
 
-    if (trendItems && trendItems.length > 0) return mapToSimpleArticle(trendItems[0]);
+    if (trendItems && trendItems.length > 0) return mapToContentItem(trendItems[0]);
     return null;
   };
 
   // 2. Category Columns
-  const fetchCategoryArticles = async (categorySlug: string) => {
+  const fetchCategoryArticles = async (categorySlug: string): Promise<ContentItem[]> => {
     const { data: catData } = await supabase
       .from('categories')
       .select('id')
@@ -162,7 +107,7 @@ export default async function Home() {
       .order('created_at', { ascending: false })
       .limit(4); // 1 Feature + 3 List
 
-    return articles ? articles.map(mapToSimpleArticle) : [];
+    return articles ? articles.map(mapToContentItem) : [];
   };
 
   // Parallel Fetching
@@ -175,20 +120,23 @@ export default async function Home() {
   ]);
 
   // Use fetched hero or default
-  const heroArticle = fetchedHero || DEFAULT_HERO;
+  const heroArticle = fetchedHero || HERO_ARTICLE;
 
   // Fallback for categories if empty
-  const getRecentFallback = async (limit = 3) => {
+  const getRecentFallback = async (limit = 3): Promise<ContentItem[]> => {
     const { data } = await supabase.from('trend_articles').select('*').order('created_at', { ascending: false }).limit(limit);
-    return data && data.length > 0 ? data.map(mapToSimpleArticle) : MOCK_AI_ARTICLES.slice(0, limit);
+    return data && data.length > 0 ? data.map(mapToContentItem) : AI_ARTICLES.slice(0, limit);
   }
 
   // Secondary Featured Grid (Right side of hero)
-  const secondaryFeatured = await getRecentFallback(3);
+  // Logic: Use AI articles as secondary featured if available, else generic fallback
+  const secondaryFeatured = aiArticles.length > 0 ? aiArticles.slice(1, 4) : AI_ARTICLES.slice(1, 4);
 
   // Safe fallbacks
-  const safeAi = aiArticles.length > 0 ? aiArticles : MOCK_AI_ARTICLES.slice(0, 4);
-  const safeFinance = financeArticles.length > 0 ? financeArticles : await getRecentFallback(4);
+  const safeAi = aiArticles.length > 0 ? aiArticles : AI_ARTICLES;
+  const safeFinance = financeArticles.length > 0 ? financeArticles : FINANCE_ARTICLES;
+  // Use REPORT_ARTICLES for Global as a fallback if culture is empty
+  const safeGlobal = cultureArticles.length > 0 ? cultureArticles : REPORT_ARTICLES;
 
   return (
     <main className="min-h-screen bg-slate-50 text-[#111111] font-sans">
@@ -272,7 +220,7 @@ export default async function Home() {
                     {item.title}
                   </h4>
                   <p className="text-slate-500 text-sm line-clamp-3 leading-relaxed">
-                    {item.description}
+                    {item.summary}
                   </p>
                 </div>
               </Link>
@@ -329,7 +277,7 @@ export default async function Home() {
             <div className="space-y-6">
               <h3 className="font-bold border-b border-slate-200 pb-2 text-sm uppercase tracking-wider text-slate-900">Global</h3>
               <div className="flex flex-col gap-4">
-                {cultureArticles.map(story => (
+                {safeGlobal.map(story => (
                   <Link key={story.id} href={`/news/${story.slug}`} className="group">
                     <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-700 leading-snug mb-1">{story.title}</h4>
                     <p className="text-xs text-slate-400">{story.dateDisplay}</p>

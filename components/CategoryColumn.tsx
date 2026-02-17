@@ -1,19 +1,10 @@
 import Link from 'next/link';
+import { ContentItem } from '@/types/content';
 import { Clock, ArrowRight } from 'lucide-react';
-
-export interface SimpleArticle {
-    id: string;
-    slug: string;
-    title: string;
-    description: string;
-    image_url?: string;
-    created_at: string;
-    dateDisplay?: string;
-}
 
 interface CategoryColumnProps {
     category: string;
-    articles: SimpleArticle[];
+    articles: ContentItem[];
     className?: string;
 }
 
@@ -55,7 +46,7 @@ export function CategoryColumn({ category, articles, className }: CategoryColumn
                     {featured.title}
                 </h4>
                 <p className="text-sm text-slate-400 line-clamp-2 leading-relaxed">
-                    {featured.description}
+                    {featured.summary}
                 </p>
             </Link>
 

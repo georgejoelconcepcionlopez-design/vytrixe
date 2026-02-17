@@ -112,6 +112,44 @@ export default function MarketsPage() {
                     </div>
                 )}
             </div>
+
+            {/* Market Intelligence Section */}
+            <div className="container mx-auto max-w-6xl px-4 mt-20">
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-900">Market Intelligence</h2>
+                        <p className="text-slate-500 text-sm">Latest financial analysis and signals.</p>
+                    </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-8">
+                    {[
+                        {
+                            title: 'Bitcoin Breaks $100k Barrier on ETF Wraps',
+                            summary: 'Institutional inflows surge as major pension funds allocate 1% to crypto assets.',
+                            category: 'Crypto',
+                            slug: 'bitcoin-breaks-100k',
+                            date: '4h ago'
+                        },
+                        {
+                            title: 'Fed Signals Rate Cuts Before Year End',
+                            summary: 'Powell suggests inflation data is "encouraging enough" to consider localized easing.',
+                            category: 'Finance',
+                            slug: 'fed-rate-cuts-signal',
+                            date: '8h ago'
+                        }
+                    ].map((news, i) => (
+                        <div key={i} className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-all">
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-cyan-600 bg-cyan-50 px-2 py-1 rounded-sm">{news.category}</span>
+                                <span className="text-xs text-slate-400">{news.date}</span>
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-900 mb-2 hover:text-blue-700 cursor-pointer">{news.title}</h3>
+                            <p className="text-slate-600 text-sm leading-relaxed">{news.summary}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     )
 }
