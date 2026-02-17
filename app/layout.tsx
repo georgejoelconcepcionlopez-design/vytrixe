@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vytrixe - Global Intelligence & Trend Analysis",
-  description: "Vytrixe is a real-time global intelligence and trend analysis platform delivering high-authority deep-dive insights across AI, Finance, Technology, Sports, and Global Markets.",
+  title: "Vytrixe — AI & Global Market Intelligence Lab",
+  description: "Independent intelligence on AI infrastructure, capital flows, and global technological shifts.",
   icons: {
     icon: '/favicon.ico', // Fallback, we will use SVG if possible or generated
     shortcut: '/favicon-16x16.png',

@@ -22,11 +22,11 @@ export function Navbar() {
 
     const navLinks = [
         { name: "Home", href: "/", icon: null },
+        { name: "Intelligence", href: "/intel", icon: null },
         { name: "Markets", href: "/markets", icon: null },
         { name: "Reports", href: "/reports", icon: null },
-        { name: "Intelligence", href: "/intel", icon: null },
-        { name: "Games", href: "/games", icon: null },
-        // { name: "Admin", href: "/admin", icon: null },
+        { name: "Lab", href: "/lab", icon: null },
+        { name: "About", href: "/about", icon: null },
     ]
 
     return (

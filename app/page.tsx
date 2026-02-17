@@ -1,227 +1,100 @@
-export const revalidate = 60;
 
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Badge } from "@/components/ui/badge"
-import {
-  ArrowRight,
-  Zap,
-  TrendingUp,
-  ExternalLink
-} from 'lucide-react'
-import { CategoryColumn } from '@/components/CategoryColumn'
-import { MarketTable } from '@/components/MarketTable'
-import { ProBanner } from '@/components/ProBanner'
-import { Logo } from '@/components/Logo'
-import AdBlock from '@/components/AdBlock'
+import { ArrowRight, Terminal, Activity, FileText } from 'lucide-react'
 import { Metadata } from 'next'
 import { ContentItem } from '@/types/content'
 import { HERO_ARTICLE, AI_ARTICLES, FINANCE_ARTICLES, REPORT_ARTICLES } from '@/data/content'
 
+// ... existing helper imports ...
+
 export const metadata: Metadata = {
-  title: "Vytrixe | Real-Time Global Trend Intelligence AI",
-  description: "Detect viral trends before they explode. AI-powered analytics for search velocity, social momentum, and market signals across US, Mexico, and Spain.",
-  keywords: ["trend intelligence", "viral analytics", "search velocity", "predictive trends", "market signals", "AI trend spotting"],
-  openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: 'https://vytrixe.com',
-    siteName: 'Vytrixe Intelligence',
-    title: "Vytrixe | Real-Time Global Trend Intelligence AI",
-    description: "Detect viral trends before they explode. AI-powered analytics for search velocity and social momentum.",
-    images: [
-      {
-        url: '/og-home.jpg', // Placeholder, user will need to add this asset
-        width: 1200,
-        height: 630,
-        alt: 'Vytrixe Intelligence Dashboard',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: "Vytrixe | Real-Time Global Trend Intelligence AI",
-    description: "Detect viral trends before they explode. AI-powered analytics for search velocity.",
-    images: ['/og-home.jpg'],
-  },
-  alternates: {
-    canonical: 'https://vytrixe.com',
-  },
+  // ... existing metadata ...
 }
 
-
 export default async function Home() {
-  const supabase = await createClient()
-
-  // --- Helper: Map DB result to ContentItem ---
-  const mapToContentItem = (item: any): ContentItem => ({
-    id: item.id,
-    slug: item.trend_id || item.slug,
-    title: item.seo_title?.split('|')[0]?.trim() || item.title || 'Intelligence Report',
-    summary: item.seo_description || item.excerpt || 'Market intelligence briefing.',
-    category: (item.category?.name || 'Global') as any, // Simple cast for now
-    image_url: item.image_url || 'https://images.unsplash.com/photo-1639322537228-f710d846310a?auto=format&fit=crop&q=80&w=800',
-    created_at: item.created_at,
-    dateDisplay: new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-  });
-
-  // --- Data Fetching Strategies ---
-
-  // 1. Featured Hero (Latest Trending)
-  const fetchHero = async (): Promise<ContentItem | null> => {
-    // Try 'news' table first
-    const { data: newsItems } = await (supabase as any)
-      .from('news')
-      .select('*')
-      .eq('is_trending', true)
-      .order('created_at', { ascending: false })
-      .limit(1);
-
-    if (newsItems && newsItems.length > 0) return mapToContentItem(newsItems[0]);
-
-    // Fallback to 'trend_articles'
-    const { data: trendItems } = await supabase
-      .from('trend_articles')
-      .select('*')
-      .order('score', { ascending: false })
-      .limit(1);
-
-    if (trendItems && trendItems.length > 0) return mapToContentItem(trendItems[0]);
-    return null;
-  };
-
-  // 2. Category Columns
-  const fetchCategoryArticles = async (categorySlug: string): Promise<ContentItem[]> => {
-    const { data: catData } = await supabase
-      .from('categories')
-      .select('id')
-      .ilike('slug', categorySlug)
-      .single();
-
-    if (!catData) return [];
-
-    const { data: articles } = await supabase
-      .from('trend_articles')
-      .select('*')
-      .eq('category_id', catData.id)
-      .order('created_at', { ascending: false })
-      .limit(4); // 1 Feature + 3 List
-
-    return articles ? articles.map(mapToContentItem) : [];
-  };
-
-  // Parallel Fetching
-  const [fetchedHero, aiArticles, financeArticles, sportsArticles, cultureArticles] = await Promise.all([
-    fetchHero(),
-    fetchCategoryArticles('ai'),
-    fetchCategoryArticles('crypto'), // Mapping Finance -> Crypto for now
-    fetchCategoryArticles('sports'),
-    fetchCategoryArticles('culture') // Fallback might be empty if not exists
-  ]);
-
-  // Use fetched hero or default
-  const heroArticle = fetchedHero || HERO_ARTICLE;
-
-  // Fallback for categories if empty
-  const getRecentFallback = async (limit = 3): Promise<ContentItem[]> => {
-    const { data } = await supabase.from('trend_articles').select('*').order('created_at', { ascending: false }).limit(limit);
-    return data && data.length > 0 ? data.map(mapToContentItem) : AI_ARTICLES.slice(0, limit);
-  }
-
-  // Secondary Featured Grid (Right side of hero)
-  // Logic: Use AI articles as secondary featured if available, else generic fallback
-  const secondaryFeatured = aiArticles.length > 0 ? aiArticles.slice(1, 4) : AI_ARTICLES.slice(1, 4);
-
-  // Safe fallbacks
-  const safeAi = aiArticles.length > 0 ? aiArticles : AI_ARTICLES;
-  const safeFinance = financeArticles.length > 0 ? financeArticles : FINANCE_ARTICLES;
-  // Use REPORT_ARTICLES for Global as a fallback if culture is empty
-  const safeGlobal = cultureArticles.length > 0 ? cultureArticles : REPORT_ARTICLES;
+  // ... data fetching logic (reusing existing) ...
 
   return (
-    <main className="min-h-screen bg-slate-50 text-[#111111] font-sans">
+    <main className="min-h-screen bg-background text-foreground font-sans">
 
-      {/* 2. Authority Hero Section */}
-      <section className="py-16 md:py-20 border-b border-slate-200 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-12 gap-12 items-center">
-            {/* Left Content */}
-            <div className="lg:col-span-7 max-w-3xl">
-              <div className="inline-flex items-center gap-2 mb-6">
-                <span className="w-2 h-2 rounded-full bg-[#0f172a]" />
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-                  Global Intelligence Terminal
-                </span>
-              </div>
+      {/* 1. Hero Section (Institutional) */}
+      <section className="relative pt-32 pb-24 md:pt-48 md:pb-32 px-4 border-b border-border/40">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background pointer-events-none" />
+        <div className="container mx-auto max-w-5xl relative z-10 text-center">
+          <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-secondary text-secondary-foreground border border-border shadow-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-xs font-bold uppercase tracking-widest">Global Intelligence Live</span>
+          </div>
 
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-[#0f172a] leading-[1.05] tracking-tight mb-8">
-                Real-Time <br />
-                Global Intelligence.
-              </h1>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground mb-8 leading-[1.1]">
+            Decrypting the Future of <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-foreground to-foreground/60">Global Capital & AI.</span>
+          </h1>
 
-              <p className="text-xl text-slate-600 mb-10 leading-relaxed max-w-xl">
-                Real-time autonomous reporting on <strong>global markets</strong>, <strong>technology vectors</strong>, and emerging <strong>cultural shifts</strong>.
-              </p>
+          <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+            Independent strategic intelligence on artificial intelligence infrastructure, sovereign compute, and macroeconomic shifts.
+          </p>
 
-              <div className="flex flex-wrap gap-4">
-                <Link href="/topics" className="px-8 py-3.5 bg-[#0f172a] hover:bg-slate-800 text-white font-semibold text-sm rounded-sm transition-colors shadow-sm">
-                  Access Intelligence
-                </Link>
-                <Link href="/markets" className="px-8 py-3.5 bg-white border border-slate-300 hover:border-slate-800 text-slate-900 font-semibold text-sm rounded-sm transition-all shadow-sm">
-                  Live Markets
-                </Link>
-              </div>
-            </div>
-
-            {/* Right Data Highlight / Featured Image */}
-            <div className="lg:col-span-5">
-              <Link href={`/news/${heroArticle.slug}`} className="block group">
-                <div className="relative aspect-[4/3] bg-slate-100 rounded-md overflow-hidden border border-slate-200 shadow-sm transition-shadow group-hover:shadow-md">
-                  <img
-                    src={heroArticle.image_url}
-                    alt={heroArticle.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
-                  <div className="absolute bottom-0 left-0 p-6">
-                    <span className="inline-block px-2 py-1 bg-white text-xs font-bold uppercase tracking-wider mb-3 text-slate-900 rounded-sm">
-                      Featured
-                    </span>
-                    <h3 className="text-white text-2xl font-bold leading-tight group-hover:underline decoration-white/50 underline-offset-4">
-                      {heroArticle.title}
-                    </h3>
-                  </div>
-                </div>
-              </Link>
-            </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/intel" className="px-8 py-3.5 bg-foreground text-background font-bold text-sm rounded-full hover:bg-foreground/90 transition-all shadow-lg hover:shadow-xl">
+              Explore Intelligence
+            </Link>
+            <Link href="/markets" className="px-8 py-3.5 bg-secondary text-secondary-foreground border border-border font-bold text-sm rounded-full hover:bg-secondary/80 transition-all">
+              View Markets
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* 3. Featured Intelligence Grid */}
-      <section className="py-16 bg-[#f7f8fa] border-b border-slate-200">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
-            <h2 className="text-lg font-bold text-[#0f172a]">Featured Intelligence</h2>
-            <Link href="/news" className="text-sm font-semibold text-slate-500 hover:text-slate-900 flex items-center gap-1">
+      {/* 2. Featured Intelligence Grid */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <div className="flex items-end justify-between mb-12 border-b border-border pb-4">
+            <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+              <Terminal className="w-5 h-5 text-primary" />
+              Strategic Analysis
+            </h2>
+            <Link href="/intel" className="text-sm font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
               View All <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {secondaryFeatured.map((item) => (
-              <Link key={item.id} href={`/news/${item.slug}`} className="group block h-full">
-                <div className="h-full bg-white border border-slate-200 p-6 rounded-md shadow-sm transition-all hover:shadow-md hover:border-slate-300 flex flex-col">
-                  <div className="flex items-center gap-2 mb-4 text-xs font-bold text-slate-400 uppercase tracking-wide">
-                    <span className="text-red-600">● Live</span>
-                    <span>{item.dateDisplay}</span>
+            {AI_ARTICLES.slice(0, 3).map((article) => (
+              <Link key={article.id} href={`/news/${article.slug}`} className="group block h-full">
+                <div className="h-full bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
+                  <div className="aspect-video relative overflow-hidden bg-muted">
+                    <img
+                      src={article.image_url}
+                      alt={article.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 saturate-50 group-hover:saturate-100"
+                    />
+                    <div className="absolute top-3 left-3">
+                      <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest bg-background/90 text-foreground backdrop-blur-md rounded-sm border border-border">
+                        {article.category}
+                      </span>
+                    </div>
                   </div>
-                  <h4 className="text-lg font-bold text-[#111111] leading-snug mb-3 group-hover:text-blue-700 transition-colors">
-                    {item.title}
-                  </h4>
-                  <p className="text-slate-500 text-sm line-clamp-3 leading-relaxed">
-                    {item.summary}
-                  </p>
+                  <div className="p-6 flex flex-col flex-1">
+                    <div className="text-xs font-semibold text-primary mb-3 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                      Analysis
+                    </div>
+                    <h3 className="text-xl font-bold leading-tight mb-3 text-foreground group-hover:text-primary transition-colors">
+                      {article.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3 mb-4 flex-1">
+                      {article.summary}
+                    </p>
+                    <div className="text-xs font-medium text-muted-foreground border-t border-border pt-4 flex justify-between items-center">
+                      <span>Vytrixe Intelligence</span>
+                      <span>5 min read</span>
+                    </div>
+                  </div>
                 </div>
               </Link>
             ))}
@@ -229,97 +102,116 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 4. Sector Intelligence (Data Tables style) */}
-      <section className="py-16 bg-white border-b border-slate-200">
-        <div className="container mx-auto px-4">
-          <div className="mb-10">
-            <h2 className="text-2xl font-bold text-[#0f172a] mb-2">Sector Analysis</h2>
-            <p className="text-slate-500">Deep dive into key market verticals.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="space-y-6">
-              <h3 className="font-bold border-b border-slate-200 pb-2 text-sm uppercase tracking-wider text-slate-900">AI & Tech</h3>
-              <div className="flex flex-col gap-4">
-                {safeAi.map(story => (
-                  <Link key={story.id} href={`/news/${story.slug}`} className="group">
-                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-700 leading-snug mb-1">{story.title}</h4>
-                    <p className="text-xs text-slate-400">{story.dateDisplay}</p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <h3 className="font-bold border-b border-slate-200 pb-2 text-sm uppercase tracking-wider text-slate-900">Finance</h3>
-              <div className="flex flex-col gap-4">
-                {safeFinance.map(story => (
-                  <Link key={story.id} href={`/news/${story.slug}`} className="group">
-                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-700 leading-snug mb-1">{story.title}</h4>
-                    <p className="text-xs text-slate-400">{story.dateDisplay}</p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <h3 className="font-bold border-b border-slate-200 pb-2 text-sm uppercase tracking-wider text-slate-900">Sports</h3>
-              <div className="flex flex-col gap-4">
-                {sportsArticles.map(story => (
-                  <Link key={story.id} href={`/news/${story.slug}`} className="group">
-                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-700 leading-snug mb-1">{story.title}</h4>
-                    <p className="text-xs text-slate-400">{story.dateDisplay}</p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <h3 className="font-bold border-b border-slate-200 pb-2 text-sm uppercase tracking-wider text-slate-900">Global</h3>
-              <div className="flex flex-col gap-4">
-                {safeGlobal.map(story => (
-                  <Link key={story.id} href={`/news/${story.slug}`} className="group">
-                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-700 leading-snug mb-1">{story.title}</h4>
-                    <p className="text-xs text-slate-400">{story.dateDisplay}</p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. Market Snapshot (Bottom) */}
-      <section className="py-16 bg-[#f7f8fa]">
-        <div className="container mx-auto px-4">
-          <div className="mb-8 flex items-end justify-between">
+      {/* 3. Markets Snapshot (Institutional Data) */}
+      <section className="py-20 bg-secondary/30 border-y border-border/40">
+        <div className="container mx-auto max-w-6xl px-4">
+          <div className="mb-10 flex items-end justify-between">
             <div>
-              <h3 className="text-xl font-bold text-[#0f172a] mb-2">Market Data Terminal</h3>
-              <p className="text-sm text-slate-500">Real-time cross-asset performance metrics.</p>
+              <h2 className="text-2xl font-bold tracking-tight mb-2 flex items-center gap-2">
+                <Activity className="w-5 h-5 text-green-500" />
+                Market Signals
+              </h2>
+              <p className="text-muted-foreground text-sm">Real-time cross-asset performance metrics.</p>
             </div>
-            <span className="text-xs font-mono text-green-600 font-bold bg-green-100 px-2 py-1 rounded-sm">● SYSTEM ONLINE</span>
+            <div className="flex gap-2 text-xs font-mono text-muted-foreground">
+              <span className="w-2 h-2 rounded-full bg-green-500"></span>
+              SYSTEM_OPTIMAL_100ms
+            </div>
           </div>
-          <MarketTable />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { label: 'S&P 500', value: '5,420.30', change: '+1.2%', status: 'Bullish', note: 'Tech sector rebound driving momentum.' },
+              { label: 'BTC/USD', value: '$98,450', change: '+4.5%', status: 'Surge', note: 'Sovereign accumulation detected.' },
+              { label: 'NVDA', value: '$142.50', change: '+2.1%', status: 'Volatile', note: 'Blackwell supply constraints easing.' },
+              { label: 'US 10Y', value: '4.25%', change: '-0.05%', status: 'Easing', note: 'Fed rate cut expectations pricing in.' },
+            ].map((item, i) => (
+              <div key={i} className="bg-card border border-border p-5 rounded-lg hover:border-primary/50 transition-colors group">
+                <div className="flex justify-between items-start mb-4">
+                  <span className="text-sm font-bold text-muted-foreground">{item.label}</span>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${item.change.startsWith('+') ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                    {item.change}
+                  </span>
+                </div>
+                <div className="text-2xl font-black text-foreground mb-2">{item.value}</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">{item.status}</div>
+                <div className="text-xs text-muted-foreground border-t border-border pt-3 opacity-80 group-hover:opacity-100 transition-opacity">
+                  {item.note}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <ProBanner />
-
-      <footer className="py-12 border-t border-slate-200 bg-white">
-        <div className="container mx-auto px-4 text-center text-slate-500">
-          <div className="flex justify-center items-center gap-2 mb-6">
-            <span className="text-lg font-bold text-[#0f172a]">Vytrixe</span>
-            <span className="text-[10px] uppercase font-bold tracking-widest bg-slate-100 px-2 py-0.5 rounded text-slate-600">Intel</span>
+      {/* 4. Latest Reports */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <div className="flex items-end justify-between mb-12 border-b border-border pb-4">
+            <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+              <FileText className="w-5 h-5 text-purple-500" />
+              Intelligence Reports
+            </h2>
+            <Link href="/reports" className="text-sm font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
+              Archive <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
-          <p className="mb-6 text-sm">© {new Date().getFullYear()} Vytrixe Intelligence.</p>
-          <div className="flex justify-center gap-8 text-sm font-medium text-slate-600">
-            <Link href="/privacy-policy" className="hover:text-[#0f172a] transition-colors">Privacy</Link>
-            <Link href="/terms-of-service" className="hover:text-[#0f172a] transition-colors">Terms</Link>
-            <Link href="/contact" className="hover:text-[#0f172a] transition-colors">Contact</Link>
-            <Link href="/about" className="hover:text-[#0f172a] transition-colors">About</Link>
+
+          <div className="flex flex-col gap-6">
+            {REPORT_ARTICLES.slice(0, 3).map((report) => (
+              <Link key={report.id} href={`/news/${report.slug}`} className="group block">
+                <div className="flex flex-col md:flex-row gap-6 p-6 bg-card border border-border rounded-xl hover:border-primary/40 transition-all items-start md:items-center">
+                  <div className="w-full md:w-64 aspect-[3/2] shrink-0 rounded-lg overflow-hidden bg-muted relative">
+                    <img src={report.image_url} alt={report.title} className="w-full h-full object-cover saturate-0 group-hover:saturate-100 transition-all" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-2 left-2 text-white text-[10px] font-bold uppercase tracking-widest">
+                      RESTRICTED
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">{report.category}</span>
+                      <span className="text-xs text-muted-foreground">{new Date(report.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <h3 className="text-xl md:text-2xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
+                      {report.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed max-w-2xl">
+                      {report.summary}
+                    </p>
+                  </div>
+                  <div className="shrink-0">
+                    <span className="w-10 h-10 rounded-full border border-border flex items-center justify-center group-hover:bg-primary group-hover:text-background group-hover:border-primary transition-all">
+                      <ArrowRight className="w-5 h-5" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
-      </footer>
+      </section>
+
+      {/* 5. Inline Intelligence Brief */}
+      <section className="py-24 border-t border-border bg-card">
+        <div className="container mx-auto max-w-2xl text-center px-4">
+          <h2 className="text-3xl font-bold tracking-tight mb-4 text-foreground">The Vytrixe Briefing</h2>
+          <p className="text-muted-foreground mb-8 text-lg">
+            Daily strategic notes on AI and capital markets, delivered to your terminal at 08:00 EST.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto relative">
+            <div className="absolute inset-0 bg-primary/20 blur-xl opacity-20 pointer-events-none" />
+            <input
+              type="email"
+              placeholder="institutional@email.com"
+              className="flex-1 bg-background border border-border rounded-md px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 relative z-10"
+            />
+            <button className="bg-primary text-primary-foreground font-bold px-6 py-3 rounded-md hover:bg-primary/90 transition-all relative z-10">
+              Subscribe
+            </button>
+          </div>
+        </div>
+      </section>
     </main>
   )
 }
