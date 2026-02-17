@@ -1,5 +1,5 @@
 
-export type ContentCategory = 'AI' | 'Tech' | 'Finance' | 'Crypto' | 'Startups' | 'Marketing' | 'Global' | 'Sports' | 'Culture';
+export type ContentCategory = 'AI' | 'Tech' | 'Finance' | 'Crypto' | 'Startups' | 'Marketing' | 'Global' | 'Sports' | 'Culture' | 'Intelligence' | 'Markets';
 
 export interface ContentItem {
     id: string;
@@ -13,6 +13,7 @@ export interface ContentItem {
     tags?: string[];
     is_featured?: boolean;
     dateDisplay?: string;
+    content?: string;
 }
 
 // Unified Data Store

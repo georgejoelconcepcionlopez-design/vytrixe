@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { Globe, Cpu, TrendingUp, Twitter, Linkedin, Github, ShieldCheck, Mail, Zap, Lock } from 'lucide-react'
 import { Logo } from '@/components/Logo'
+import { AdPlaceholder } from '@/components/AdPlaceholder'
 
 export function GlobalFooter() {
     return (
@@ -17,6 +18,9 @@ export function GlobalFooter() {
                         VYTRIXE is a global technology and market intelligence platform delivering real-time insights across AI, Tech, Startups, and Crypto.
                     </p>
                 </div>
+
+                {/* Footer Ad Placement */}
+                <AdPlaceholder slot="footer-slot-789" className="mb-16 min-h-[90px]" />
 
                 {/* 4-Column Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 mb-20">

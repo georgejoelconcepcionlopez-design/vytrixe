@@ -15,7 +15,21 @@ interface NewsPageProps {
     params: Promise<{ slug: string }>;
 }
 
+import { ALL_CONTENT } from '@/data/content';
+
 async function getArticle(slug: string) {
+    // 0. Check Static Content (Premium)
+    const staticArticle = ALL_CONTENT.find(a => a.slug === slug);
+    if (staticArticle) {
+        return {
+            ...staticArticle,
+            image: staticArticle.image_url, // Map for compatibility
+            image_url: staticArticle.image_url,
+            description: staticArticle.summary,
+            views: 1205 // Mock views
+        };
+    }
+
     const supabase = await createClient();
 
     // 1. Try fetching from 'news' table

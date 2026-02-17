@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: ['/api/', '/admin/', '/private/'],
+            disallow: ['/api/', '/_next/', '/private/'],
         },
         sitemap: 'https://vytrixe.com/sitemap.xml',
     }

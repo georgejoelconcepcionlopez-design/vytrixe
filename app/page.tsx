@@ -5,6 +5,7 @@ import { ArrowRight, Terminal, Activity, FileText } from 'lucide-react'
 import { Metadata } from 'next'
 import { ContentItem } from '@/types/content'
 import { HERO_ARTICLE, AI_ARTICLES, FINANCE_ARTICLES, REPORT_ARTICLES } from '@/data/content'
+import { AdPlaceholder } from '@/components/AdPlaceholder'
 
 // ... existing helper imports ...
 
@@ -49,6 +50,11 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* Hero Ad Placement */}
+      <div className="container mx-auto max-w-5xl px-4">
+        <AdPlaceholder slot="hero-slot-123" label="Sponsor" />
+      </div>
 
       {/* 2. Featured Intelligence Grid */}
       <section className="py-20 px-4">
