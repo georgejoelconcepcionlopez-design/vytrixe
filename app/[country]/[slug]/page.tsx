@@ -1,7 +1,7 @@
 
 import { fetchTrendArticle, fetchVytrixeArticle, TrendArticle, ArticleSection } from "@/services/articleService"
 import { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { AdBanner } from "@/components/AdBanner"
 import { ShareButtons } from "@/components/ShareButtons"
 import { Badge } from "@/components/ui/badge"
@@ -25,23 +25,40 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { country, slug } = await params
 
+    // Check for Category Redirect (Fix for /intelligence/[slug] crash)
+    const categories = ['ai', 'tech', 'finance', 'crypto', 'startups', 'marketing', 'global', 'sports', 'culture', 'intelligence', 'markets'];
+    if (categories.includes(country.toLowerCase())) {
+        return {
+            title: 'Vytrixe Intelligence',
+            description: 'Redirecting to article...',
+            robots: { index: false }
+        }
+    }
+
     // Check Vytrixe first
     const lang = ['es', 'mx', 'do'].includes(country) ? 'es' : 'en';
-    const { article: vytrixeArticle } = await fetchVytrixeArticle(slug, lang);
 
-    if (vytrixeArticle) {
-        const content = vytrixeArticle.content[lang];
-        return {
-            title: content.metaTitle || content.title,
-            description: content.metaDescription || content.summary,
-            openGraph: {
+    try {
+        const { article: vytrixeArticle } = await fetchVytrixeArticle(slug, lang);
+
+        if (vytrixeArticle) {
+            const content = vytrixeArticle.content ? vytrixeArticle.content[lang] : null;
+            if (!content) return { title: 'Article Not Found' };
+
+            return {
                 title: content.metaTitle || content.title,
                 description: content.metaDescription || content.summary,
-                type: 'article',
-                publishedTime: vytrixeArticle.published_at,
-                images: [{ url: vytrixeArticle.image_url || '', width: 1200, height: 630 }]
+                openGraph: {
+                    title: content.metaTitle || content.title,
+                    description: content.metaDescription || content.summary,
+                    type: 'article',
+                    publishedTime: vytrixeArticle.published_at,
+                    images: [{ url: vytrixeArticle.image_url || '', width: 1200, height: 630 }]
+                }
             }
         }
+    } catch (e) {
+        console.error('Metadata generation error:', e);
     }
 
     const article = await fetchTrendArticle(slug, country) as TrendArticle | null
@@ -84,11 +101,27 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function TrendArticlePage({ params }: PageProps) {
     const { country, slug } = await params
 
+    // Check for Category Redirect (Fix for /intelligence/[slug] crash)
+    const categories = ['ai', 'tech', 'finance', 'crypto', 'startups', 'marketing', 'global', 'sports', 'culture', 'intelligence', 'markets'];
+    if (categories.includes(country.toLowerCase())) {
+        redirect(`/news/${slug}`);
+    }
+
     // 1. Try Fetching Vytrixe Article (New Model)
     const lang = ['es', 'mx', 'do'].includes(country) ? 'es' : 'en';
-    const { article: vytrixeArticle, isLocked } = await fetchVytrixeArticle(slug, lang);
 
-    if (vytrixeArticle) {
+    let vytrixeArticle = null;
+    let isLocked = false;
+
+    try {
+        const result = await fetchVytrixeArticle(slug, lang);
+        vytrixeArticle = result.article;
+        isLocked = result.isLocked;
+    } catch (e) {
+        console.error("Vytrixe fetch error:", e);
+    }
+
+    if (vytrixeArticle && vytrixeArticle.content && vytrixeArticle.content[lang]) {
         const content = vytrixeArticle.content[lang];
 
         return (
@@ -136,7 +169,7 @@ export default async function TrendArticlePage({ params }: PageProps) {
                         {isLocked ? (
                             <PremiumLock />
                         ) : (
-                            <div dangerouslySetInnerHTML={{ __html: content.body }} />
+                            <div dangerouslySetInnerHTML={{ __html: content?.body || '' }} />
                         )}
                     </article>
 
