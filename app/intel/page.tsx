@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function IntelPage() {
     // Filter for Intelligence type content (AI, Tech, Global)
-    const intelArticles = ALL_CONTENT.filter(item => ['AI', 'Tech', 'Global'].includes(item.category));
+    const intelArticles = ALL_CONTENT.filter(item => ['AI', 'Tech', 'Global', 'Intelligence'].includes(item.category));
 
     return (
         <main className="min-h-screen bg-background text-foreground font-sans">

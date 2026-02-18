@@ -158,14 +158,10 @@ export default async function NewsDetailPage({ params }: NewsPageProps) {
                     <div className="lg:col-span-3 space-y-8">
                         <AdBlock position="article_top" />
 
-                        {/* AdBlock Top */}
-                        <AdBlock position="article_top" />
 
                         <div className="text-lg leading-relaxed text-slate-300">
                             <ArticleRenderer content={processedContent} />
                         </div>
-
-                        <AdBlock position="article_mid" />
 
                         {/* Financial Disclaimer */}
                         <div className="bg-white/5 border border-white/10 p-4 rounded-lg text-sm text-slate-400 italic">
