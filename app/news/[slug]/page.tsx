@@ -104,7 +104,7 @@ export default async function NewsDetailPage({ params }: NewsPageProps) {
         .limit(3);
 
     const structuredData = generateArticleSchema(article);
-    const processedContent = injectContextualLinks(article.content || '');
+    // const processedContent = injectContextualLinks(article.content || ''); -> Disabled
 
     return (
         <main className="min-h-screen bg-[#02040A] text-white">
@@ -160,7 +160,7 @@ export default async function NewsDetailPage({ params }: NewsPageProps) {
 
 
                         <div className="text-lg leading-relaxed text-slate-300">
-                            <ArticleRenderer content={processedContent} />
+                            <ArticleRenderer content={article.content || ''} />
                         </div>
 
                         {/* Financial Disclaimer */}
