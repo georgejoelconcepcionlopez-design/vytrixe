@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { ArrowRight, Activity, Zap, Shield, Globe } from 'lucide-react'
 import { Metadata } from 'next'
-import { HERO_ARTICLE, MARKET_PRIME_ARTICLE, FEATURED_ARTICLES, ALL_CONTENT } from '@/data/content'
+import { HERO_ARTICLE, MARKET_PRIME_ARTICLE, FEATURED_ARTICLES, ALL_CONTENT, CLUSTER_ARTICLES } from '@/data/content'
 import { AdPlaceholder } from '@/components/AdPlaceholder'
 
 export const metadata: Metadata = {

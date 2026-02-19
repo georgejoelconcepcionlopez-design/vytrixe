@@ -1,5 +1,6 @@
+import { CategorySlug } from '@/lib/categories';
 
-export type ContentCategory = 'AI' | 'Tech' | 'Finance' | 'Crypto' | 'Startups' | 'Marketing' | 'Global' | 'Sports' | 'Culture' | 'Intelligence' | 'Markets';
+export type ContentCategory = CategorySlug;
 
 export interface ContentItem {
     id: string;
@@ -14,6 +15,7 @@ export interface ContentItem {
     is_featured?: boolean;
     dateDisplay?: string;
     content?: string;
+    metadata?: Record<string, any>;
 }
 
 // Unified Data Store

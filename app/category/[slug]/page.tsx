@@ -1,107 +1,129 @@
-import { createClient } from '@/lib/supabase/server';
-import { notFound } from 'next/navigation';
-import NewsCard from '@/components/NewsCard';
-import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-import { ArrowLeft, Zap } from 'lucide-react';
-import AdBlock from '@/components/AdBlock';
 
-interface CategoryPageProps {
-    params: Promise<{ slug: string }>;
+import { Metadata } from 'next';
+import { notFound, redirect } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import { ALL_CONTENT } from '@/data/content';
+import { getCategory, getAllCategories } from '@/lib/categories';
+import { ContentItem } from '@/types/content';
+
+// Simple Article Card for Listing
+function ArticleListItem({ article }: { article: ContentItem }) {
+    return (
+        <Link href={`/news/${article.slug}`} className="group block mb-8">
+            <div className="border-l-2 border-slate-200 dark:border-slate-800 pl-6 hover:border-cyan-500 transition-colors">
+                <div className="text-xs font-mono text-cyan-600 dark:text-cyan-400 mb-2 uppercase tracking-wider">
+                    {article.created_at ? new Date(article.created_at).toLocaleDateString() : 'RECENT'}
+                </div>
+                <h3 className="text-xl md:text-2xl font-bold mb-3 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+                    {article.title}
+                </h3>
+                <p className="text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl">
+                    {article.summary}
+                </p>
+            </div>
+        </Link>
+    );
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
-    const supabase = await createClient();
+const aliasMap: Record<string, string> = {
+    'ai': 'ai-infrastructure',
+    'tech': 'ai-infrastructure',
+    'artificial-intelligence': 'ai-infrastructure',
+    'finance': 'markets',
+    'economy': 'markets',
+    'business': 'markets',
+    'politics': 'geopolitics',
+    'world': 'geopolitics',
+    'robots': 'robotics',
+    'blockchain': 'crypto',
+    'web3': 'crypto'
+};
+
+// 1. Generate Static Params for SSG (Optional but efficient)
+export async function generateStaticParams() {
+    const categories = getAllCategories();
+    return categories.map((cat) => ({
+        slug: cat.slug,
+    }));
+}
+
+// 2. SEO Metadata
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const category = getCategory(slug);
+
+    if (!category) return {};
+
+    return {
+        title: `${category.name} | Vytrixe Intelligence`,
+        description: category.description,
+        openGraph: {
+            title: `${category.name} | Vytrixe Intelligence`,
+            description: category.description,
+            type: 'website',
+            url: `https://vytrixe.com/category/${slug}`,
+        }
+    };
+}
+
+// 3. Page Component
+export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
 
-    // Helper function to map trend_articles to News structure
-    const mapTrendToNews = (item: any) => ({
-        id: item.id,
-        title: item.seo_title?.split('|')[0]?.trim() || 'Intelligence Report',
-        slug: item.trend_id,
-        excerpt: item.seo_description || 'Real-time market signal analysis and strategic intelligence.',
-        image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800',
-        category: item.categories?.name || slug,
-        source: 'Vytrixe Editorial',
-        author: 'AI Intel Desk',
-        createdAt: item.created_at,
-        views: item.views || 0,
-        is_trending: true
-    });
-
-    let newsList = [];
-    const { data: nList, error: nErr } = await (supabase as any)
-        .from('news')
-        .select('*')
-        .eq('category', slug)
-        .order('created_at', { ascending: false })
-        .limit(12);
-
-    if (!nList || nList.length === 0 || nErr) {
-        // Fallback to trend_articles
-        const { data: lFallback } = await supabase
-            .from('trend_articles')
-            .select('*, categories!inner(name, slug)')
-            .eq('categories.slug', slug)
-            .order('created_at', { ascending: false })
-            .limit(12);
-
-        if (lFallback) {
-            newsList = lFallback.map(mapTrendToNews);
-        }
-    } else {
-        newsList = nList;
+    // Check aliases first
+    const normalizedSlug = slug.toLowerCase();
+    if (aliasMap[normalizedSlug]) {
+        redirect(`/category/${aliasMap[normalizedSlug]}`);
     }
 
-    if (newsList.length === 0 && !['technology', 'business', 'science', 'health', 'general'].includes(slug)) {
+    const category = getCategory(slug);
+
+    if (!category) {
         notFound();
     }
 
-    return (
-        <main className="min-h-screen bg-[#02040A] text-white">
-            <div className="py-24 border-b border-white/5 bg-gradient-to-b from-[#0A0F1F] to-[#02040A]">
-                <div className="container mx-auto px-4">
-                    <Link href="/" className="inline-flex items-center text-xs font-bold text-slate-500 hover:text-cyan-400 mb-12 transition-colors uppercase tracking-widest">
-                        <ArrowLeft className="h-4 w-4 mr-2" /> Global Intelligence
-                    </Link>
+    // Filter Content
+    const categoryArticles = ALL_CONTENT.filter(
+        (article) => article.category === category.slug
+    );
 
-                    <div className="max-w-4xl">
-                        <Badge className="bg-cyan-500 text-black font-black mb-6 px-4 py-1.5 rounded-full uppercase italic text-xs">Category Hub</Badge>
-                        <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tighter uppercase italic">{slug}</h1>
-                        <p className="text-xl md:text-2xl text-slate-400 leading-relaxed max-w-2xl font-medium">
-                            Real-time {slug} coverage and AI-driven market signals.
-                        </p>
-                    </div>
+    return (
+        <div className="min-h-screen bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-slate-100 font-sans">
+            {/* Header */}
+            <div className="bg-white dark:bg-black border-b border-slate-200 dark:border-white/10 pt-24 pb-12">
+                <div className="container mx-auto max-w-5xl px-6">
+                    <Link href="/" className="inline-flex items-center text-sm text-slate-500 hover:text-cyan-500 mb-8 transition-colors">
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back to Intelligence
+                    </Link>
+                    <h1 className="text-5xl md:text-6xl font-black tracking-tight mb-4 uppercase">
+                        {category.name}
+                    </h1>
+                    <p className="text-xl text-slate-500 dark:text-slate-400 max-w-2xl border-l-4 border-cyan-500 pl-6">
+                        {category.description}
+                    </p>
                 </div>
             </div>
 
-            <section className="py-24">
-                <div className="container mx-auto px-4">
-                    <div className="flex items-center gap-4 mb-16 px-4 py-2 bg-white/5 rounded-2xl w-fit border border-white/5">
-                        <div className="flex items-center gap-2 text-xs font-bold text-cyan-400">
-                            <Zap className="h-4 w-4" /> Hub Tracking
-                        </div>
-                        <div className="h-4 w-[1px] bg-white/10" />
-                        <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">{newsList?.length || 0} Active Articles</div>
-                    </div>
-
-                    <AdBlock position="category_top" />
-
-                    {newsList && newsList.length > 0 ? (
-                        <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8">
-                            {newsList.map((news: any) => (
-                                <NewsCard key={news.id} news={news} />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-24 text-slate-500 italic">
-                            No articles found in this category yet.
-                        </div>
-                    )}
-
-                    <AdBlock position="category_bottom" />
+            {/* List */}
+            <div className="container mx-auto max-w-5xl px-6 py-16">
+                <div className="mb-8 text-xs font-mono text-slate-400 uppercase tracking-widest">
+                    {categoryArticles.length} Intelligence Briefs Found
                 </div>
-            </section>
-        </main>
+
+                {categoryArticles.length > 0 ? (
+                    <div className="space-y-4">
+                        {categoryArticles.map((article) => (
+                            <ArticleListItem key={article.id} article={article} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="p-12 border border-dashed border-slate-300 dark:border-slate-800 text-center rounded">
+                        <p className="text-slate-500 italic">No intelligence briefs currently available in this sector.</p>
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }

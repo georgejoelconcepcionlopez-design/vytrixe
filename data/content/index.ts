@@ -1,51 +1,25 @@
 
 import { ContentItem } from '@/types/content';
 
-export const HERO_ARTICLE: ContentItem = {
-    id: 'intel-1',
-    title: 'The AI Infrastructure Arms Race in 2026',
-    summary: 'Sovereign nations and hyperscalers are participating in the largest capital expenditure cycle in history. We analyze the $2T shift towards sovereign compute and physical infrastructure.',
-    category: 'Intelligence',
-    slug: 'ai-infrastructure-arms-race-2026',
-    image_url: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80&w=1200',
-    created_at: new Date().toISOString(),
-    is_featured: true,
-    author: 'Vytrixe Intelligence Desk',
-    content: `
-        <h3>Executive Summary</h3>
-        <p>The global race for Artificial Intelligence (AI) dominance has fundamentally shifted from a software optimization battle to a physical infrastructure arms race. In 2026, we are witnessing a capital expenditure cycle projected to exceed <strong>$2 trillion</strong> globally, driven by hyperscalers (Microsoft, Google, Amazon) and increasingly, sovereign nations.</p>
-        <p>This report analyzes the geopolitical, economic, and industrial implications of this shift, focusing on the bottleneck transition from silicon availability to energy capacity.</p>
+export const HERO_ARTICLE = AI_INFRA_FORECAST_2026;
 
-        <h3>The Pivot to Physical Layer</h3>
-        <p>For the past decade, value accrual in tech was defined by software margins. Today, the moat is physical. Access to gigawatt-scale power, liquid-cooling capacity, and specialized interconnects defines the new hierarchy of power.</p>
-        <p>Current data indicates that for every $1 spent on H100/Blackwell GPUs, approximately $1.50 is now required for the supporting infrastructure (energy generation, thermal management, data center construction).</p>
-
-        <h3>Hyperscaler Capital Expenditure</h3>
-        <p>Microsoft and Google have effectively uncapped their capex guidance for FY2026. The objective is clear: to secure <em>compute sovereignty</em>. This is not merely about training larger models, but about controlling the inference layer for the global economy.</p>
-        <ul>
-            <li><strong>Microsoft:</strong> Focusing on nuclear power deals to secure baseload reliability.</li>
-            <li><strong>Amazon (AWS):</strong> Aggressively acquiring land for mega-campus construction in energy-rich regions.</li>
-            <li><strong>Google:</strong> Investing heavily in custom TPU silicon to reduce dependency on merchant silicon providers.</li>
-        </ul>
-
-        <h3>Strategic Implications</h3>
-        <p>The "AI Iron Curtain" is taking shape. Export controls are creating bifurcated supply chains. Nations without domestic compute capacity risk becoming "client states" in the digital economy, forced to rent intelligence from dominant US or Chinese providers.</p>
-
-        <h3>Market Impact Analysis</h3>
-        <p>We remain bullish on the "picks and shovels" of this physical build-out. While attention is fixated on Nvidia, the structural winners for the next 24 months will likely be companies involved in:</p>
-        <ol>
-            <li><strong>Grid Modernization:</strong> Copper wiring, transformers, and high-voltage transmission.</li>
-            <li><strong>Thermal Management:</strong> Liquid cooling solutions for high-density racks.</li>
-            <li><strong>Nuclear Energy:</strong> SMRs (Small Modular Reactors) and uranium plays.</li>
-        </ol>
-    `
-};
+export const CLUSTER_ARTICLES = [
+    AI_DATA_CENTER_TRENDS,
+    HYPERSCALER_CAPEX_GROWTH,
+    SOVEREIGN_AI_DEEP_DIVE,
+    GPU_SUPPLY_CONSTRAINTS,
+    ADVANCED_PACKAGING,
+    AI_CLOUD_SCALING,
+    EDGE_VS_CENTRALIZED,
+    AI_INVESTMENT_RISKS,
+    GLOBAL_DC_EXPANSION
+];
 
 export const MARKET_PRIME_ARTICLE: ContentItem = {
     id: 'intel-2',
     title: 'Nvidia and the $2 Trillion Compute Expansion Cycle',
     summary: 'As the Blackwell architecture rolls out, we examine the supply chain elasticity and the "shadow demand" from sovereign wealth funds.',
-    category: 'Markets',
+    category: 'markets',
     slug: 'nvidia-2-trillion-compute-cycle',
     image_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200',
     created_at: new Date(Date.now() - 3600000).toISOString(),
@@ -71,7 +45,7 @@ export const FEATURED_ARTICLES: ContentItem[] = [
         id: 'intel-3',
         title: 'Sovereign AI and the Rise of Compute Nationalism',
         summary: 'Why nations are treating GPUs as strategic reserves similar to gold or oil. The geopolitical case for domestic intelligence infrastructure.',
-        category: 'Global',
+        category: 'geopolitics',
         slug: 'sovereign-ai-compute-nationalism',
         image_url: 'https://images.unsplash.com/photo-1526304640152-d461968e37ad?auto=format&fit=crop&q=80&w=1200',
         created_at: new Date(Date.now() - 7200000).toISOString(),
@@ -95,7 +69,7 @@ export const FEATURED_ARTICLES: ContentItem[] = [
         id: 'intel-4',
         title: 'AI Energy Demand and Global Grid Modernization',
         summary: 'The AI revolution is colliding with physics. Analyzing the grid capability gap and the investment opportunities in energy transmission.',
-        category: 'Tech',
+        category: 'ai-infrastructure',
         slug: 'ai-energy-demand-grid-modernization',
         image_url: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&q=80&w=1200',
         created_at: new Date(Date.now() - 10800000).toISOString(),
@@ -116,7 +90,7 @@ export const FEATURED_ARTICLES: ContentItem[] = [
         id: 'intel-5',
         title: 'The AI Cloud Wars: Amazon vs Microsoft vs Google',
         summary: 'A comparative analysis of the hyperscaler dominance battle. Who owns the enterprise inference market in 2026?',
-        category: 'Tech',
+        category: 'enterprise',
         slug: 'ai-cloud-wars-2026',
         image_url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200',
         created_at: new Date(Date.now() - 14400000).toISOString(),
@@ -138,8 +112,39 @@ export const FEATURED_ARTICLES: ContentItem[] = [
     }
 ];
 
-export const ALL_CONTENT = [HERO_ARTICLE, MARKET_PRIME_ARTICLE, ...FEATURED_ARTICLES];
+import { AI_INFRA_FORECAST_2026 } from './articles/ai-infrastructure-forecast-2026';
+import { NVIDIA_HARDWARE_SUPERCYCLE } from './articles/nvidia-ai-hardware-supercycle';
+import { AI_ENERGY_FORECAST_2026 } from './articles/ai-energy-consumption-forecast-2026';
+import {
+    AI_DATA_CENTER_TRENDS,
+    HYPERSCALER_CAPEX_GROWTH,
+    SOVEREIGN_AI_DEEP_DIVE,
+    GPU_SUPPLY_CONSTRAINTS,
+    ADVANCED_PACKAGING,
+    AI_CLOUD_SCALING,
+    EDGE_VS_CENTRALIZED,
+    AI_INVESTMENT_RISKS,
+    GLOBAL_DC_EXPANSION
+} from './articles/ai-infra-cluster';
 
-export const AI_ARTICLES = ALL_CONTENT.filter(a => a.category === 'AI' || a.category === 'Tech');
-export const FINANCE_ARTICLES = ALL_CONTENT.filter(a => a.category === 'Finance' || a.category === 'Crypto' || a.category === 'Markets');
-export const REPORT_ARTICLES = ALL_CONTENT.filter(a => a.category === 'Global' || a.category === 'Intelligence');
+export const ALL_CONTENT = [
+    AI_INFRA_FORECAST_2026,
+    NVIDIA_HARDWARE_SUPERCYCLE,
+    AI_ENERGY_FORECAST_2026,
+    AI_DATA_CENTER_TRENDS,
+    HYPERSCALER_CAPEX_GROWTH,
+    SOVEREIGN_AI_DEEP_DIVE,
+    GPU_SUPPLY_CONSTRAINTS,
+    ADVANCED_PACKAGING,
+    AI_CLOUD_SCALING,
+    EDGE_VS_CENTRALIZED,
+    AI_INVESTMENT_RISKS,
+    GLOBAL_DC_EXPANSION,
+    HERO_ARTICLE,
+    MARKET_PRIME_ARTICLE,
+    ...FEATURED_ARTICLES
+];
+
+export const AI_ARTICLES = ALL_CONTENT.filter(a => a.category === 'ai-infrastructure' || a.category === 'enterprise');
+export const FINANCE_ARTICLES = ALL_CONTENT.filter(a => a.category === 'markets' || a.category === 'crypto');
+export const REPORT_ARTICLES = ALL_CONTENT.filter(a => a.category === 'geopolitics' || a.category === 'research');
