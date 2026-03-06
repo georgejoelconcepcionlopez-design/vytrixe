@@ -6,6 +6,10 @@ export async function GET() {
     try {
         const supabase = await createClient<Database>()
 
+        if (!supabase) {
+            return NextResponse.json({ status: 'error', message: 'Supabase client not initialized' }, { status: 500 })
+        }
+
         // 1. Fetch current trends
         const { data: trends } = await supabase
             .from('trends')
@@ -14,7 +18,7 @@ export async function GET() {
         if (!trends) throw new Error('No trends found')
 
         // 2. Prepare updates (Simple touch to created_at or just verify existence)
-        const updates = trends.map(trend => ({
+        const updates = trends.map((trend: any) => ({
             id: trend.id,
             country_code: trend.country_code,
             trend_id: trend.trend_id,

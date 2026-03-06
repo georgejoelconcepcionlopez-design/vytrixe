@@ -39,7 +39,7 @@ async function fetchTrends() {
 
         const aiKeywords = ['AI', 'Intelligence', 'Nvidia', 'OpenAI', 'GPT', 'Robot', 'Machine', 'Google', 'Microsoft', 'Meta', 'LLM', 'Chip', 'Data', 'Tech', 'Cyber', 'DeepSeek', 'Model'];
 
-        let selectedTrend = null;
+        let selectedTrend: any = null;
 
         for (const item of feed.items) {
             const title = item.title || '';

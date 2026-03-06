@@ -14,6 +14,7 @@ interface SeoPageProps {
 export async function generateMetadata({ params }: SeoPageProps): Promise<Metadata> {
     const { slug } = await params;
     const supabase = await createClient();
+    if (!supabase) return { title: 'Vytrixe Intelligence' };
 
     const { data: seoPage } = await (supabase as any)
         .from('seo_pages')
@@ -43,6 +44,10 @@ export default async function SeoLandingPage({ params }: SeoPageProps) {
     const { slug } = await params;
     const supabase = await createClient();
 
+    if (!supabase) {
+        notFound();
+    }
+
     const { data: seoPage } = await (supabase as any)
         .from('seo_pages')
         .select('*')
@@ -54,7 +59,7 @@ export default async function SeoLandingPage({ params }: SeoPageProps) {
     }
 
     // Generate FAQ Schema conditionally
-    let faqSchema = null;
+    let faqSchema: any = null;
     if (seoPage.content?.faq && seoPage.content.faq.length > 0) {
         faqSchema = {
             "@context": "https://schema.org",

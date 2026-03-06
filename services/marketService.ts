@@ -16,9 +16,9 @@ const COINGECKO_API = 'https://api.coingecko.com/api/v3';
 // Mock data generator for stocks/indices fallback (reliable & realistic)
 function generateMockSparkline(startPrice: number, points: number = 24): number[] {
     let current = startPrice;
-    const data = [];
+    const data: number[] = [];
     for (let i = 0; i < points; i++) {
-        const change = (Math.random() - 0.5) * (startPrice * 0.02); // 2% volatility
+        const change = (Math.random() - 0.5) * ((startPrice as number) * 0.02); // 2% volatility
         current += change;
         data.push(current);
     }

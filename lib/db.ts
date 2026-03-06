@@ -32,6 +32,10 @@ function mapDatabaseArticle(article: any): FormattedArticle {
 
 export async function getLatestArticles(limit: number = 10): Promise<FormattedArticle[]> {
     const supabase = await createClient();
+    if (!supabase) {
+        console.warn("Supabase client not initialized. Returning empty articles.");
+        return [];
+    }
 
     // Fetch published articles
     const { data: articles, error } = await (supabase as any)
@@ -70,6 +74,10 @@ export async function getLatestArticles(limit: number = 10): Promise<FormattedAr
 
 export async function getArticlesByCategory(categorySlug: string, limit: number = 20): Promise<FormattedArticle[]> {
     const supabase = await createClient();
+    if (!supabase) {
+        console.warn("Supabase client not initialized. Returning empty category articles.");
+        return [];
+    }
 
     // 1. Get category ID
     const { data: categoryData } = await (supabase as any)
@@ -102,6 +110,10 @@ export async function getArticlesByCategory(categorySlug: string, limit: number 
 
 export async function getArticleBySlug(slug: string): Promise<FormattedArticle | null> {
     const supabase = await createClient();
+    if (!supabase) {
+        console.warn("Supabase client not initialized. Returning null article.");
+        return null;
+    }
 
     const { data: article, error } = await (supabase as any)
         .from('articles')

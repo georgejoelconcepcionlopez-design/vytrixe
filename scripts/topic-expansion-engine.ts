@@ -39,15 +39,15 @@ async function runExpansionWithRetry(retries = 3) {
         }
 
         // 2. Resolve Categories
-        const resolvedClusters = []
+        const resolvedClusters: any[] = []
         for (const cluster of CLUSTERS) {
-            const { data, error: catErr } = await supabase.from('categories').select('id, name, slug').eq('slug', cluster.slug).single()
+            const { data, error: catErr } = await (supabase as any).from('categories').select('id, name, slug').eq('slug', cluster.slug).single()
             if (catErr && catErr.code === 'PGRST205' && retries > 0) {
                 console.log(`⚠️ Schema lag on categories [${cluster.slug}]. Retrying in 2s...`)
                 await wait(2000)
                 return runExpansionWithRetry(retries - 1)
             }
-            if (data) resolvedClusters.push({ ...cluster, id: data.id, realName: data.name })
+            if (data) resolvedClusters.push({ ...cluster, id: (data as any).id, realName: (data as any).name })
         }
 
         let totalTrends = 0
@@ -59,7 +59,7 @@ async function runExpansionWithRetry(retries = 3) {
 
             // Distribute across countries
             for (const country of COUNTRIES) {
-                const trendsToGenerate = []
+                const trendsToGenerate: any[] = []
                 // Roughly split the target count across 3 countries
                 const countPerCountry = Math.ceil(cluster.count / COUNTRIES.length)
 

@@ -4,11 +4,18 @@ import { cookies } from 'next/headers'
 import { Database } from '@/types/database.types'
 
 export async function createClient<T = Database>() {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!url || !key) {
+        return null as any
+    }
+
     const cookieStore = await cookies()
 
     return createServerClient<T>(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        url,
+        key,
         {
             cookies: {
                 getAll() {

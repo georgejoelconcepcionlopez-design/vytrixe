@@ -14,6 +14,10 @@ export default async function AuthorLandingPage({ params }: AuthorPageProps) {
     const { slug } = await params
     const supabase = await createClient()
 
+    if (!supabase) {
+        notFound()
+    }
+
     const { data: author } = await supabase
         .from('authors')
         .select('*')
@@ -79,7 +83,7 @@ export default async function AuthorLandingPage({ params }: AuthorPageProps) {
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6">
-                        {articles?.map((article) => (
+                        {articles?.map((article: any) => (
                             <Link key={article.id} href={`/${article.country_code}/${article.trend_id}`}>
                                 <Card className="bg-white/[0.03] border-white/5 hover:border-cyan-500/30 transition-all group">
                                     <CardContent className="p-8">

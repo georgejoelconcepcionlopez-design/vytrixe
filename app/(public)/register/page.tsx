@@ -20,6 +20,10 @@ export default function RegisterPage() {
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault()
+        if (!supabase) {
+            setError('System configuration error: Supabase client not initialized.')
+            return
+        }
         setLoading(true)
         setError(null)
 
