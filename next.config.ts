@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+console.log("[Vytrixe Deployment Monitor] Next.js Initialization Started. Verifying environment configurations...");
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
