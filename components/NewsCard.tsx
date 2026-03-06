@@ -21,7 +21,7 @@ export default function NewsCard({ news, featured = false }: NewsCardProps) {
 
     if (featured) {
         return (
-            <Link href={`/news/${news.slug}`}>
+            <Link href={`/article/${news.slug}`}>
                 <Card className="relative overflow-hidden group border-none bg-black h-[500px]">
                     <div className="absolute inset-0">
                         <img
@@ -53,7 +53,7 @@ export default function NewsCard({ news, featured = false }: NewsCardProps) {
     }
 
     return (
-        <Link href={`/news/${news.slug}`}>
+        <Link href={`/article/${news.slug}`}>
             <Card className="bg-[#0A0F1F] border-white/5 hover:border-cyan-500/30 transition-all p-0 overflow-hidden group h-full">
                 <div className="aspect-video overflow-hidden">
                     <img

@@ -26,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // 3. Article Routes
     const articles = ALL_CONTENT.map((article) => ({
-        url: `${BASE_URL}/news/${article.slug}`,
+        url: `${BASE_URL}/article/${article.slug}`,
         lastModified: new Date(article.created_at),
         changeFrequency: 'weekly' as const,
         priority: 0.7,

@@ -22,13 +22,13 @@ export function Navbar() {
     }, [])
 
     const navLinks = [
-        { name: "AI", href: "/ai" },
-        { name: "Technology", href: "/technology" },
-        { name: "Crypto", href: "/crypto" },
-        { name: "Startups", href: "/startups" },
-        { name: "Business", href: "/business" },
-        { name: "Viral", href: "/viral" },
-        { name: "Tools", href: "/tools" },
+        { name: "AI", href: "/category/ai" },
+        { name: "Technology", href: "/category/technology" },
+        { name: "Crypto", href: "/category/crypto" },
+        { name: "Startups", href: "/category/startups" },
+        { name: "Business", href: "/category/business" },
+        { name: "Viral", href: "/category/viral" },
+        { name: "Tools", href: "/category/tools" },
     ]
 
     return (

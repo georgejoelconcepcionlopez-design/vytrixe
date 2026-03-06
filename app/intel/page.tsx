@@ -36,7 +36,7 @@ export default function IntelPage() {
                 <div className="flex flex-col gap-8">
                     {intelArticles.map((article) => (
                         <article key={article.id} className="group border-b border-border pb-8 last:border-0">
-                            <Link href={`/news/${article.slug}`} className="block">
+                            <Link href={`/article/${article.slug}`} className="block">
                                 <div className="flex flex-col md:flex-row gap-6 items-start">
                                     <div className="w-full md:w-48 aspect-video md:aspect-[4/3] bg-muted rounded-lg overflow-hidden shrink-0">
                                         <img

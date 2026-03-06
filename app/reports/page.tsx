@@ -52,7 +52,7 @@ export default function ReportsPage() {
                                     <span className="text-xs text-muted-foreground">{new Date(report.created_at).toLocaleDateString()}</span>
                                 </div>
                                 <CardTitle className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
-                                    <Link href={`/news/${report.slug}`} className="hover:underline decoration-primary/30 underline-offset-4">
+                                    <Link href={`/article/${report.slug}`} className="hover:underline decoration-primary/30 underline-offset-4">
                                         {report.title}
                                     </Link>
                                 </CardTitle>
@@ -62,7 +62,7 @@ export default function ReportsPage() {
                                     {report.summary}
                                 </p>
                                 <div className="flex gap-4">
-                                    <Link href={`/news/${report.slug}`} className="flex-1">
+                                    <Link href={`/article/${report.slug}`} className="flex-1">
                                         <button className="w-full py-2.5 px-4 bg-secondary text-secondary-foreground text-sm font-semibold rounded-md hover:bg-secondary/80 transition-colors flex items-center justify-center gap-2 border border-border">
                                             Read Analysis <ArrowRight className="w-4 h-4" />
                                         </button>

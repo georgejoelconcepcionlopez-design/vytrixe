@@ -27,7 +27,7 @@ export function CategoryColumn({ category, articles, className }: CategoryColumn
             </div>
 
             {/* Featured Item */}
-            <Link href={`/news/${featured.slug}`} className="group mb-8 block">
+            <Link href={`/article/${featured.slug}`} className="group mb-8 block">
                 <div className="aspect-[4/3] bg-white/5 rounded-none border border-white/10 overflow-hidden mb-4 relative">
                     {/* Image Placeholder or Actual Image */}
                     <img
@@ -53,7 +53,7 @@ export function CategoryColumn({ category, articles, className }: CategoryColumn
             {/* List Items */}
             <div className="space-y-6 border-t border-white/5 pt-6 mt-auto">
                 {listItems.map((article) => (
-                    <Link key={article.id} href={`/news/${article.slug}`} className="group block">
+                    <Link key={article.id} href={`/article/${article.slug}`} className="group block">
                         <div className="flex flex-col gap-1">
                             <h5 className="text-sm font-bold text-slate-200 group-hover:text-cyan-400 transition-colors line-clamp-2 leading-snug">
                                 {article.title}

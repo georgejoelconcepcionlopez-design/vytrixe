@@ -183,3 +183,23 @@ DO $$ BEGIN
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
+
+-- 11. SEO Pages
+CREATE TABLE IF NOT EXISTS seo_pages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  keyword TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  title TEXT NOT NULL,
+  meta_description TEXT NOT NULL,
+  content JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_seo_pages_slug ON seo_pages(slug);
+ALTER TABLE seo_pages ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN
+    CREATE POLICY "Public read for seo pages" ON seo_pages FOR SELECT USING (true);
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
