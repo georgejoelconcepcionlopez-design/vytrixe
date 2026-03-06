@@ -1,67 +1,79 @@
+import { Flame, Activity, Zap, Shield, Rocket } from "lucide-react";
 
-import { Metadata } from 'next'
-import { Terminal, Shield, Globe, Cpu } from 'lucide-react'
-
-export const metadata: Metadata = {
-    title: "About Vytrixe | Global Intelligence Lab",
-    description: "Vytrixe is an independent strategic intelligence platform analyzing the intersection of artificial intelligence, capital markets, and sovereign infrastructure.",
-}
+export const metadata = {
+    title: "About | Vytrixe",
+    description: "The premier intelligence platform for AI, Tech, and Global Markets.",
+};
 
 export default function AboutPage() {
     return (
-        <main className="min-h-screen bg-background text-foreground font-sans py-20 px-4">
-            <div className="container mx-auto max-w-4xl">
+        <main className="min-h-screen bg-background pt-24 pb-20">
+            <div className="container mx-auto px-4 max-w-4xl">
                 <div className="text-center mb-16">
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
-                        Decoding the <span className="text-primary">Machine Age</span>
+                    <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-mono text-primary uppercase tracking-wider">
+                        Vytrixe Directive
+                    </div>
+                    <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tight">
+                        Intelligence for the <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">AI Supercycle</span>
                     </h1>
-                    <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-                        Vytrixe is an independent strategic intelligence lab. We provide institutional-grade analysis on the rapid evolution of AI infrastructure, global capital flows, and the geopolitics of compute.
+                    <p className="text-xl text-muted-foreground leading-relaxed">
+                        We filter the noise of the hype cycle to deliver high-signal intelligence for the physical and digital infrastructure powering the future.
                     </p>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-12 mb-20">
-                    <div className="space-y-6">
-                        <div className="flex items-start gap-4">
-                            <div className="p-3 bg-secondary rounded-lg"><Terminal className="w-6 h-6 text-primary" /></div>
-                            <div>
-                                <h3 className="text-xl font-bold mb-2">Technical Depth</h3>
-                                <p className="text-muted-foreground">We look beyond the hype. Our analysis focuses on the physical constraints of the AI supply chain—energy, thermal, and packaging.</p>
-                            </div>
-                        </div>
-                        <div className="flex items-start gap-4">
-                            <div className="p-3 bg-secondary rounded-lg"><Globe className="w-6 h-6 text-blue-400" /></div>
-                            <div>
-                                <h3 className="text-xl font-bold mb-2">Global Perspective</h3>
-                                <p className="text-muted-foreground">Technology does not exist in a vacuum. We track sovereign AI initiatives and the shifting alliances of the semiconductor trade.</p>
-                            </div>
-                        </div>
+                <section className="mb-20">
+                    <h2 className="text-2xl font-bold mb-8 border-b border-border pb-4 flex items-center gap-2">
+                        <TargetIcon className="w-6 h-6 text-primary" /> Our Mission
+                    </h2>
+                    <div className="prose prose-invert max-w-none text-lg leading-relaxed text-slate-300">
+                        <p>
+                            Vytrixe was engineered to solve a specific problem: the information asymmetry in the AI and technology markets. While mainstream media focuses on consumer applications and stock tickers, the real shifts are happening in sovereign wealth allocation, energy grid modernization, and semiconductor supply chains.
+                        </p>
+                        <p>
+                            We utilize an array of autonomous intelligence agents to aggregate, analyze, and synthesize breaking technical and market data into actionable insights for our readership.
+                        </p>
                     </div>
-                    <div className="space-y-6">
-                        <div className="flex items-start gap-4">
-                            <div className="p-3 bg-secondary rounded-lg"><Cpu className="w-6 h-6 text-purple-400" /></div>
-                            <div>
-                                <h3 className="text-xl font-bold mb-2">Market Signals</h3>
-                                <p className="text-muted-foreground">We correlate technological breakthroughs with market movements, providing a clear signal in a noisy information landscape.</p>
-                            </div>
-                        </div>
-                        <div className="flex items-start gap-4">
-                            <div className="p-3 bg-secondary rounded-lg"><Shield className="w-6 h-6 text-green-400" /></div>
-                            <div>
-                                <h3 className="text-xl font-bold mb-2">Zero Noise</h3>
-                                <p className="text-muted-foreground">No clickbait. No rumors. Just verified intelligence and strategic outlooks for decision-makers.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </section>
 
-                <div className="border-t border-border pt-16 text-center">
-                    <h2 className="text-2xl font-bold mb-6">Our Mission</h2>
-                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                        To build the terminal for the next industrial revolution. Vytrixe aims to be the definitive source of truth for the AI economy, bridging the gap between Silicon Valley engineering and Wall Street capital.
-                    </p>
-                </div>
+                <section className="grid md:grid-cols-2 gap-8 mb-20">
+                    <div className="bg-card border border-border p-8 rounded-2xl">
+                        <Zap className="w-8 h-8 text-cyan-400 mb-4" />
+                        <h3 className="text-xl font-bold mb-3">Signal Over Noise</h3>
+                        <p className="text-muted-foreground text-sm leading-relaxed">
+                            We don't publish press releases. We publish the second-order effects of those press releases on the broader macro environment.
+                        </p>
+                    </div>
+                    <div className="bg-card border border-border p-8 rounded-2xl">
+                        <Shield className="w-8 h-8 text-purple-400 mb-4" />
+                        <h3 className="text-xl font-bold mb-3">Institutional Grade</h3>
+                        <p className="text-muted-foreground text-sm leading-relaxed">
+                            Written for the architects of capital and code. Our analysis assumes a high baseline of technical and financial literacy.
+                        </p>
+                    </div>
+                </section>
+
             </div>
         </main>
+    );
+}
+
+function TargetIcon(props: any) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <circle cx="12" cy="12" r="10" />
+            <circle cx="12" cy="12" r="6" />
+            <circle cx="12" cy="12" r="2" />
+        </svg>
     )
 }

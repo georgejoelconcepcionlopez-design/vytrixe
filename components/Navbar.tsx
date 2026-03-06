@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, X, Terminal, Globe, Brain, Zap, User } from "lucide-react"
+import { Menu, X, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 export function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
@@ -21,12 +22,13 @@ export function Navbar() {
     }, [])
 
     const navLinks = [
-        { name: "Home", href: "/", icon: null },
-        { name: "Intelligence", href: "/intel", icon: null },
-        { name: "Markets", href: "/markets", icon: null },
-        { name: "Reports", href: "/reports", icon: null },
-        { name: "Lab", href: "/lab", icon: null },
-        { name: "About", href: "/about", icon: null },
+        { name: "AI", href: "/ai" },
+        { name: "Technology", href: "/technology" },
+        { name: "Crypto", href: "/crypto" },
+        { name: "Startups", href: "/startups" },
+        { name: "Business", href: "/business" },
+        { name: "Viral", href: "/viral" },
+        { name: "Tools", href: "/tools" },
     ]
 
     return (
@@ -34,63 +36,64 @@ export function Navbar() {
             className={cn(
                 "sticky top-0 z-50 w-full border-b transition-all duration-300",
                 scrolled
-                    ? "bg-white/90 backdrop-blur-md border-slate-200/60 shadow-sm supports-[backdrop-filter]:bg-white/60"
-                    : "bg-white border-transparent"
+                    ? "bg-background/90 backdrop-blur-md border-border shadow-sm"
+                    : "bg-background border-transparent"
             )}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo (Left) */}
-                    <div className="flex-shrink-0 w-[140px]">
+                    <div className="flex-shrink-0 flex items-center pr-8">
                         <Link href="/" className="flex items-center gap-2 group">
-                            <div className="w-8 h-8 rounded-lg bg-[#0f172a] flex items-center justify-center text-white font-bold text-lg shadow-md group-hover:scale-105 transition-transform duration-200">
-                                V
-                            </div>
-                            <span className="text-xl font-bold tracking-tight text-[#0f172a]">
+                            <span className="text-2xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
                                 Vytrixe
                             </span>
                         </Link>
                     </div>
 
-                    {/* Centered Desktop Menu */}
-                    <div className="hidden md:flex flex-1 justify-center">
-                        <nav className="flex items-center space-x-1 bg-slate-100/50 p-1.5 rounded-full border border-slate-200/60 backdrop-blur-sm">
+                    {/* Desktop Menu */}
+                    <div className="hidden md:flex flex-1 items-center justify-center">
+                        <div className="flex space-x-1">
                             {navLinks.map((link) => (
                                 <Link
                                     key={link.name}
                                     href={link.href}
                                     className={cn(
-                                        "px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200",
-                                        pathname === link.href
-                                            ? "bg-white text-[#0f172a] shadow-sm ring-1 ring-slate-200"
-                                            : "text-slate-500 hover:text-[#0f172a] hover:bg-white/60"
+                                        "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                                        pathname.startsWith(link.href)
+                                            ? "text-primary bg-primary/10"
+                                            : "text-muted-foreground hover:text-foreground hover:bg-card"
                                     )}
                                 >
                                     {link.name}
                                 </Link>
                             ))}
-                        </nav>
+                        </div>
                     </div>
 
-                    {/* Right Actions */}
-                    <div className="hidden md:flex items-center justify-end w-[140px] gap-3">
-                        <Link href="/login">
-                            <Button variant="ghost" size="sm" className="text-slate-600 hover:text-[#0f172a] font-medium hover:bg-slate-100">
-                                Sign In
-                            </Button>
-                        </Link>
-                        <Link href="/register">
-                            <Button size="sm" className="bg-[#0f172a] text-white hover:bg-[#0f172a]/90 font-medium shadow-sm hover:shadow-md transition-all active:scale-95 rounded-full px-5">
-                                Get Started
+                    {/* Right Actions & Search */}
+                    <div className="hidden md:flex items-center justify-end gap-4 pl-8">
+                        <div className="relative group">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                            <Input
+                                type="search"
+                                placeholder="Search trends..."
+                                className="w-64 pl-9 bg-card border-border text-foreground focus-visible:ring-primary rounded-full"
+                            />
+                        </div>
+                        <Link href="/subscribe">
+                            <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_15px_rgba(0,229,255,0.3)] hover:shadow-[0_0_20px_rgba(0,229,255,0.5)] transition-all rounded-full px-5">
+                                Subscribe
                             </Button>
                         </Link>
                     </div>
 
                     {/* Mobile Menu Button */}
-                    <div className="-mr-2 flex md:hidden">
+                    <div className="-mr-2 flex md:hidden items-center gap-4">
+                        <Search className="h-5 w-5 text-muted-foreground" />
                         <button
                             onClick={() => setIsOpen(!isOpen)}
-                            className="inline-flex items-center justify-center p-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none transition-colors"
+                            className="inline-flex items-center justify-center p-2 rounded-md text-foreground hover:bg-card focus:outline-none transition-colors"
                         >
                             <span className="sr-only">Open main menu</span>
                             {isOpen ? <X className="block h-6 w-6" /> : <Menu className="block h-6 w-6" />}
@@ -102,11 +105,11 @@ export function Navbar() {
             {/* Mobile Menu Overlay */}
             <div
                 className={cn(
-                    "md:hidden transition-all duration-300 ease-in-out overflow-hidden bg-white border-b border-slate-200",
-                    isOpen ? "max-h-[24rem] opacity-100" : "max-h-0 opacity-0"
+                    "md:hidden transition-all duration-300 ease-in-out overflow-hidden bg-background border-b border-border absolute w-full left-0",
+                    isOpen ? "max-h-[30rem] opacity-100" : "max-h-0 opacity-0"
                 )}
             >
-                <div className="px-4 pt-2 pb-6 space-y-1 bg-white">
+                <div className="px-4 pt-2 pb-6 space-y-1">
                     {navLinks.map((link) => (
                         <Link
                             key={link.name}
@@ -114,23 +117,18 @@ export function Navbar() {
                             onClick={() => setIsOpen(false)}
                             className={cn(
                                 "block px-4 py-3 rounded-lg text-base font-medium transition-colors",
-                                pathname === link.href
-                                    ? "text-[#0f172a] bg-slate-50"
-                                    : "text-slate-600 hover:text-[#0f172a] hover:bg-slate-50"
+                                pathname.startsWith(link.href)
+                                    ? "text-primary bg-primary/10"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-card"
                             )}
                         >
                             {link.name}
                         </Link>
                     ))}
-                    <div className="border-t border-slate-100 pt-6 mt-4 flex flex-col gap-3 px-1">
-                        <Link href="/login" onClick={() => setIsOpen(false)}>
-                            <Button variant="outline" className="w-full justify-center h-10 rounded-lg border-slate-200">
-                                Sign In
-                            </Button>
-                        </Link>
-                        <Link href="/register" onClick={() => setIsOpen(false)}>
-                            <Button className="w-full justify-center bg-[#0f172a] text-white hover:bg-[#0f172a]/90 h-10 rounded-lg shadow-sm">
-                                Get Started
+                    <div className="border-t border-border pt-6 mt-4 flex flex-col gap-3 px-1">
+                        <Link href="/subscribe" onClick={() => setIsOpen(false)}>
+                            <Button className="w-full justify-center bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-[0_0_15px_rgba(0,229,255,0.3)] h-12 rounded-lg">
+                                Subscribe Free
                             </Button>
                         </Link>
                     </div>
@@ -139,3 +137,4 @@ export function Navbar() {
         </nav>
     )
 }
+

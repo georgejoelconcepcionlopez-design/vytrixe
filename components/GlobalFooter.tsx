@@ -25,16 +25,17 @@ export function GlobalFooter() {
                 {/* 4-Column Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 mb-20">
 
-                    {/* Column 1: Markets */}
+                    {/* Column 1: Categories */}
                     <div className="space-y-6">
-                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-500">Markets</h4>
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-500">Categories</h4>
                         <ul className="space-y-3">
-                            <li><Link href="/about" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">About VYTRIXE</Link></li>
-                            <li><Link href="/markets" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Global Markets</Link></li>
-                            <li><Link href="/category/ai" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">AI Intelligence</Link></li>
-                            <li><Link href="/category/tech" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Technology</Link></li>
-                            <li><Link href="/category/startups" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Startups</Link></li>
-                            <li><Link href="/category/crypto" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Crypto Assets</Link></li>
+                            <li><Link href="/ai" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">AI Intelligence</Link></li>
+                            <li><Link href="/technology" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Technology</Link></li>
+                            <li><Link href="/crypto" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Crypto Assets</Link></li>
+                            <li><Link href="/startups" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Startups</Link></li>
+                            <li><Link href="/business" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Business</Link></li>
+                            <li><Link href="/viral" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Viral</Link></li>
+                            <li><Link href="/tools" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Tools</Link></li>
                         </ul>
                     </div>
 
@@ -42,33 +43,30 @@ export function GlobalFooter() {
                     <div className="space-y-6">
                         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-500">Platform</h4>
                         <ul className="space-y-3">
-                            <li><Link href="/insights" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Deep Insights</Link></li>
-                            <li><Link href="/breaking" className="text-sm text-slate-400 hover:text-white transition-colors font-medium flex items-center gap-2"><div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" /> Live Coverage</Link></li>
+                            <li><Link href="/trending" className="text-sm text-slate-400 hover:text-white transition-colors font-medium flex items-center gap-2"><div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" /> Trending Now</Link></li>
                             <li><Link href="/newsletter" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Newsletter</Link></li>
-                            <li><Link href="/dashboard" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">My Dashboard</Link></li>
+                            <li><Link href="/about" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">About Vytrixe</Link></li>
+                            <li><Link href="/advertise" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Advertise</Link></li>
+                            <li><Link href="/contact" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Contact Us</Link></li>
                         </ul>
                     </div>
 
-                    {/* Column 3: VYTRIXE PRO */}
+                    {/* Column 3: Tools & Admin */}
                     <div className="space-y-6">
-                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-500 flex items-center gap-2">Vytrixe Pro <Lock className="h-3 w-3" /></h4>
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-500 flex items-center gap-2">Resources <Lock className="h-3 w-3" /></h4>
                         <ul className="space-y-3">
-                            <li><Link href="/pro" className="text-sm text-white hover:text-cyan-400 transition-colors font-bold flex items-center gap-2">Upgrade Now <Zap className="h-3 w-3 text-cyan-500" /></Link></li>
-                            <li><span className="text-sm text-slate-500 font-medium cursor-not-allowed">Ad-Free Experience</span></li>
-                            <li><span className="text-sm text-slate-500 font-medium cursor-not-allowed">Premium Signals</span></li>
-                            <li><span className="text-sm text-slate-500 font-medium cursor-not-allowed">API Access</span></li>
+                            <li><Link href="/search" className="text-sm text-white hover:text-cyan-400 transition-colors font-bold flex items-center gap-2">Search <Zap className="h-3 w-3 text-cyan-500" /></Link></li>
+                            <li><Link href="/admin" className="text-sm text-slate-500 hover:text-white font-medium">Admin Dashboard</Link></li>
                         </ul>
                     </div>
 
-                    {/* Column 4: Legal & Contact */}
+                    {/* Column 4: Legal */}
                     <div className="space-y-6">
                         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">Legal</h4>
                         <ul className="space-y-3">
-                            <li><Link href="/privacy-policy" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Privacy Policy</Link></li>
-                            <li><Link href="/terms-of-service" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Terms of Service</Link></li>
-                            <li><Link href="/cookie-policy" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Cookie Policy</Link></li>
-                            <li><Link href="/editorial-policy" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Editorial Policy</Link></li>
-                            <li><Link href="/contact" className="text-sm text-slate-400 hover:text-white transition-colors font-medium mt-4 block">Contact Support</Link></li>
+                            <li><Link href="/legal/privacy" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Privacy Policy</Link></li>
+                            <li><Link href="/legal/terms" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Terms of Service</Link></li>
+                            <li><Link href="/legal/cookies" className="text-sm text-slate-400 hover:text-white transition-colors font-medium">Cookie Policy</Link></li>
                         </ul>
                     </div>
 

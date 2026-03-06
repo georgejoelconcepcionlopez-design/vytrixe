@@ -1,169 +1,185 @@
 -- Enable Extensions
-create extension if not exists "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 1. Countries table
-create table countries (
-  code text primary key, -- 'us', 'mx', etc.
-  name text not null,
-  flag_emoji text,
-  created_at timestamptz default now()
+-- 1. Users
+DO $$ BEGIN
+    CREATE TYPE user_role AS ENUM ('free', 'pro', 'admin');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+CREATE TABLE IF NOT EXISTS public.users (
+  id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL PRIMARY KEY,
+  email TEXT,
+  full_name TEXT,
+  avatar_url TEXT,
+  role user_role DEFAULT 'free',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Seed initial countries
-insert into countries (code, name, flag_emoji) values
-('us', 'United States', '🇺🇸'),
-('mx', 'Mexico', '🇲🇽'),
-('es', 'Spain', '🇪🇸'),
-('do', 'Dominican Republic', '🇩🇴')
-on conflict (code) do nothing;
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.users (id, email, full_name, avatar_url)
+  VALUES (new.id, new.email, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 2. User Profiles (linked to auth.users)
-create type user_role as enum ('free', 'pro', 'admin');
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
-create table public.users (
-  id uuid references auth.users on delete cascade not null primary key,
-  email text,
-  full_name text,
-  avatar_url text,
-  role user_role default 'free',
-  created_at timestamptz default now(),
-  updated_at timestamptz default now()
-);
-
--- Trigger to create profile on signup
-create or replace function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public.users (id, email, full_name, avatar_url)
-  values (new.id, new.email, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
-  return new;
-end;
-$$ language plpgsql security definer;
-
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
-
--- 3. Trends
-create table trends (
-  id uuid default uuid_generate_v4() primary key,
-  country_code text references countries(code) not null,
-  title text not null,
-  slug text not null,
-  query text not null, -- The search query
-  volume int default 0,
-  score float default 0,
-  is_active boolean default true,
-  last_updated timestamptz default now(),
-  created_at timestamptz default now(),
-  unique(country_code, slug)
-);
-
--- 4. Trend History (for analytics/graphs)
-create table trend_history (
-  id uuid default uuid_generate_v4() primary key,
-  trend_id uuid references trends(id) on delete cascade not null,
-  volume int,
-  score float,
-  captured_at timestamptz default now()
-);
-
--- 5. Articles (News associated with trends)
-create table articles (
-  id uuid default uuid_generate_v4() primary key,
-  trend_id uuid references trends(id) on delete cascade not null,
-  title text not null,
-  url text not null,
-  source text,
-  published_at timestamptz,
-  created_at timestamptz default now()
-);
-
--- 6. Favorites (User saved trends)
-create table favorites (
-  id uuid default uuid_generate_v4() primary key,
-  user_id uuid references public.users(id) on delete cascade not null,
-  trend_id uuid references trends(id) on delete cascade not null,
-  created_at timestamptz default now(),
-  unique(user_id, trend_id)
-);
-
--- 7. Alerts (Notifications for users)
-create table alerts (
-  id uuid default uuid_generate_v4() primary key,
-  user_id uuid references public.users(id) on delete cascade not null,
-  trend_id uuid references trends(id) on delete cascade, 
-  keyword text, -- Create alert by keyword manually?
-  threshold_score float,
-  is_active boolean default true,
-  created_at timestamptz default now()
-);
-
--- Row Level Security (RLS)
-alter table countries enable row level security;
-alter table users enable row level security;
-alter table trends enable row level security;
-alter table trend_history enable row level security;
-alter table articles enable row level security;
-alter table favorites enable row level security;
-alter table alerts enable row level security;
-
--- Policies (Simplified for Base)
--- Public read for countries/trends/articles
-create policy "Public countries are viewable by everyone" on countries for select using (true);
-create policy "Public trends are viewable by everyone" on trends for select using (true);
-create policy "Public history are viewable by everyone" on trend_history for select using (true);
-create policy "Public articles are viewable by everyone" on articles for select using (true);
-
--- User policies
-create policy "Users can see their own profile" on public.users for select using (auth.uid() = id);
-create policy "Users can update own profile" on public.users for update using (auth.uid() = id);
-
-create policy "Users can see own favorites" on favorites for select using (auth.uid() = user_id);
-create policy "Users can insert own favorites" on favorites for insert with check (auth.uid() = user_id);
-create policy "Users can delete own favorites" on favorites for delete using (auth.uid() = user_id);
-
-create policy "Users can see own alerts" on alerts for select using (auth.uid() = user_id);
-create policy "Users can manage own alerts" on alerts for all using (auth.uid() = user_id);
-
--- 8. Vytrixe Scalable Articles (Bilingual & Premium)
-CREATE TYPE article_status AS ENUM ('draft', 'pending-review', 'published');
-CREATE TYPE article_category AS ENUM ('ai', 'tech', 'startups', 'crypto', 'trending');
-
-CREATE TABLE vytrixe_articles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+-- 2. Categories
+CREATE TABLE IF NOT EXISTS categories (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT UNIQUE NOT NULL,
   slug TEXT UNIQUE NOT NULL,
-  category article_category NOT NULL,
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Seed Categories
+INSERT INTO categories (name, slug) VALUES 
+('AI', 'ai'),
+('Technology', 'technology'),
+('Crypto', 'crypto'),
+('Startups', 'startups'),
+('Business', 'business'),
+('Viral', 'viral'),
+('Tools', 'tools')
+ON CONFLICT (slug) DO NOTHING;
+
+-- 3. Tags
+CREATE TABLE IF NOT EXISTS tags (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT UNIQUE NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 4. Authors
+CREATE TABLE IF NOT EXISTS authors (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
+  name TEXT NOT NULL,
+  avatar_url TEXT,
+  bio TEXT,
+  is_ai BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Seed an AI Author
+INSERT INTO authors (name, bio, is_ai) VALUES 
+('Vytrixe AI', 'Automated intelligence and trends agent.', true)
+ON CONFLICT DO NOTHING;
+
+-- 5. Trending Topics
+CREATE TABLE IF NOT EXISTS trending_topics (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  keywords TEXT[] NOT NULL DEFAULT '{}',
+  category TEXT REFERENCES categories(slug) ON DELETE SET NULL,
+  score FLOAT DEFAULT 0,
+  source TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  processed BOOLEAN DEFAULT false
+);
+
+-- 6. Images
+CREATE TABLE IF NOT EXISTS images (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  url TEXT NOT NULL,
+  alt_text TEXT,
+  format TEXT, -- 16:9, etc.
+  resolution TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 7. SEO Metadata
+CREATE TABLE IF NOT EXISTS seo_metadata (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  meta_title TEXT,
+  meta_description TEXT,
+  og_image TEXT,
+  twitter_card TEXT,
+  schema_markup JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 8. Ad Settings
+CREATE TABLE IF NOT EXISTS ad_settings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  placement_name TEXT UNIQUE NOT NULL,
+  ad_code TEXT,
+  is_active BOOLEAN DEFAULT true,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Seed ad placeholders
+INSERT INTO ad_settings (placement_name, ad_code) VALUES
+('home_top', '<!-- Adsterra Banner -->'),
+('article_mid', '<!-- Adsterra Native -->'),
+('feed_inline', '<!-- Adsterra Inline -->'),
+('sidebar', '<!-- Adsterra Sidebar -->')
+ON CONFLICT (placement_name) DO NOTHING;
+
+-- 9. Articles
+DO $$ BEGIN
+    CREATE TYPE article_status AS ENUM ('draft', 'pending-review', 'scheduled', 'published');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+CREATE TABLE IF NOT EXISTS articles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  slug TEXT UNIQUE NOT NULL,
+  category_id UUID REFERENCES categories(id) ON DELETE RESTRICT,
+  author_id UUID REFERENCES authors(id) ON DELETE SET NULL,
+  seo_id UUID REFERENCES seo_metadata(id) ON DELETE SET NULL,
   status article_status NOT NULL DEFAULT 'draft',
   
-  -- Flags
-  is_breaking BOOLEAN DEFAULT false,
-  is_live BOOLEAN DEFAULT false,
-  is_premium BOOLEAN DEFAULT false,
-  
-  -- Media
-  image_url TEXT,
-  
-  -- Timestamps
-  published_at TIMESTAMPTZ,
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  created_at TIMESTAMPTZ DEFAULT now(),
-  auto_publish_at TIMESTAMPTZ,
-  
-  -- Content (Bilingual JSONB)
-  -- Structure: { en: { title, summary, body, meta... }, es: { ... } }
+  -- Bilingual Content
+  -- en: { title, subtitle, excerpt, content, faq }, es: { ... }
   content JSONB NOT NULL DEFAULT '{}'::jsonb,
   
-  -- Metadata (AI/SEO future proofing)
-  metadata JSONB DEFAULT '{}'::jsonb
+  image_url TEXT,
+  
+  -- Publish Scheduling
+  published_at TIMESTAMPTZ,
+  auto_publish_at TIMESTAMPTZ,
+  
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 10. Article_Tags association
+CREATE TABLE IF NOT EXISTS article_tags (
+  article_id UUID REFERENCES articles(id) ON DELETE CASCADE,
+  tag_id UUID REFERENCES tags(id) ON DELETE CASCADE,
+  PRIMARY KEY (article_id, tag_id)
 );
 
 -- Indexes
-CREATE INDEX idx_vytrixe_articles_slug ON vytrixe_articles(slug);
-CREATE INDEX idx_vytrixe_articles_published_at ON vytrixe_articles(published_at) WHERE status = 'published';
-CREATE INDEX idx_vytrixe_articles_content ON vytrixe_articles USING GIN (content);
+CREATE INDEX IF NOT EXISTS idx_articles_slug ON articles(slug);
+CREATE INDEX IF NOT EXISTS idx_articles_published_at ON articles(published_at) WHERE status = 'published';
+CREATE INDEX IF NOT EXISTS idx_trending_topics_score ON trending_topics(score DESC);
 
 -- RLS
-ALTER TABLE vytrixe_articles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Public can view published articles" ON vytrixe_articles FOR SELECT USING (status = 'published' AND published_at <= now());
-CREATE POLICY "Admins have full access" ON vytrixe_articles FOR ALL USING (auth.role() = 'service_role' OR auth.uid() IN (SELECT id FROM users WHERE role = 'admin'));
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE authors ENABLE ROW LEVEL SECURITY;
+ALTER TABLE trending_topics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+    CREATE POLICY "Public read for categories" ON categories FOR SELECT USING (true);
+    CREATE POLICY "Public read for tags" ON tags FOR SELECT USING (true);
+    CREATE POLICY "Public read for authors" ON authors FOR SELECT USING (true);
+    CREATE POLICY "Public read for trending" ON trending_topics FOR SELECT USING (processed = false);
+    CREATE POLICY "Public read for published articles" ON articles FOR SELECT USING (status = 'published' AND published_at <= now());
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useEffect, useState } from 'react'
@@ -8,17 +7,30 @@ import { TrendingUp } from 'lucide-react'
 import { Database } from '@/types/database.types'
 
 export function TrendingTicker() {
-    const [trends, setTrends] = useState<{ seo_title: string | null }[]>([])
+    const [trends, setTrends] = useState<{ title: string }[]>([])
 
     useEffect(() => {
         const fetchTrends = async () => {
-            const supabase = createClient<Database>()
+            const supabase = createClient<any>()
             const { data } = await supabase
-                .from('trends')
-                .select('seo_title')
+                .from('trending_topics')
+                .select('title')
+                .eq('processed', false)
+                .order('score', { ascending: false })
                 .limit(10)
 
-            if (data) setTrends(data)
+            if (data && data.length > 0) {
+                setTrends(data as { title: string }[])
+            } else {
+                // Mock data for initial render if DB is empty
+                setTrends([
+                    { title: 'GPT-6 Rumors' },
+                    { title: 'Global Sovereign AI Funds' },
+                    { title: 'Nuclear Power for Data Centers' },
+                    { title: 'Bitcoin Hits $100k' },
+                    { title: 'AI Video Gen Boom' }
+                ])
+            }
         }
         fetchTrends()
     }, [])
@@ -26,19 +38,16 @@ export function TrendingTicker() {
     if (trends.length === 0) return null
 
     return (
-        <div className="w-full bg-slate-50 border-b border-slate-200 py-2.5 overflow-hidden whitespace-nowrap sticky top-0 z-[100] backdrop-blur-md bg-opacity-95 text-xs font-medium">
+        <div className="w-full bg-background border-b border-border py-2 overflow-hidden whitespace-nowrap sticky top-[64px] z-40 text-xs font-medium">
             <div className="inline-flex items-center gap-6 animate-ticker px-4">
                 {/* Double the content for seamless loop */}
-                {[...trends, ...trends].map((trend, i) => (
+                {[...trends, ...trends, ...trends, ...trends].map((trend, i) => (
                     <div key={i} className="inline-flex items-center gap-2 group cursor-pointer">
-                        <TrendingUp className="h-3 w-3 text-blue-600" />
-                        <span className="font-bold uppercase tracking-wider text-slate-700 group-hover:text-blue-700 transition-colors">
-                            {(trend.seo_title || 'Intelligence').split('|')[0]}
+                        <TrendingUp className="h-3 w-3 text-secondary" />
+                        <span className="font-bold uppercase tracking-wider text-muted-foreground group-hover:text-primary transition-colors">
+                            {trend.title}
                         </span>
-                        <span className="text-green-600 font-mono">
-                            +1.2%
-                        </span>
-                        <span className="mx-2 text-slate-300">|</span>
+                        <span className="mx-2 text-border">|</span>
                     </div>
                 ))}
             </div>
