@@ -2,8 +2,14 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
     const supabase = await createClient()
+    if (!supabase) {
+        return new Response(JSON.stringify({ error: "Supabase not initialized" }), { status: 500 })
+    }
+
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
