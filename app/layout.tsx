@@ -1,6 +1,6 @@
 
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { JsonLd } from "@/components/JsonLd";
 import { TrendingTicker } from "@/components/TrendingTicker";
@@ -10,13 +10,13 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { Navbar } from "@/components/Navbar";
 import Script from "next/script";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const mono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
@@ -63,7 +63,7 @@ export default function RootLayout({
         )}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background text-foreground selection:bg-slate-200 selection:text-slate-900`}
+        className={`${inter.variable} ${mono.variable} antialiased min-h-screen bg-background text-foreground selection:bg-slate-200 selection:text-slate-900`}
       >
         <TrendingTicker />
         <Navbar />
