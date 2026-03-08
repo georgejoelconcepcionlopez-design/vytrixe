@@ -7,6 +7,9 @@ export interface TrendTopic {
     keywords: string[];
     category: string;
     score: number;
+    upvotes: number;
+    comments: number;
+    cross_source_hits: number;
     source: string;
     timestamp: Date;
 }
@@ -15,22 +18,33 @@ export async function processAllTrends(): Promise<TrendTopic[]> {
     console.log('[Trend Engine] Initiating multi-source trend collection...');
 
     // 1. Fetch from all sources concurrently
-    const [rssData, redditData, twitterData] = await Promise.all([
+    const [rssData, redditData, twitterData, googleData, hnData] = await Promise.all([
         fetchRSSTrends(),
         fetchRedditTrends(),
-        fetchTwitterTrends()
+        fetchTwitterTrends(),
+        fetchGoogleTrends(),
+        fetchHackerNews()
     ]);
 
-    const rawTrendsList: RawTrend[] = [...rssData, ...redditData, ...twitterData];
+    const rawTrendsList: RawTrend[] = [...rssData, ...redditData, ...twitterData, ...googleData, ...hnData];
 
-    // 2. Normalize and remove duplicates (by exact title or similarity)
-    const uniqueTrendsMap = new Map<string, RawTrend>();
+    // 2. Normalize and remove duplicates (similarity-based deduplication)
+    const uniqueTrendsMap = new Map<string, RawTrend & { count: number }>();
+
     rawTrendsList.forEach(trend => {
-        // A simple normalization for deduplication
         const normalizedTitle = trend.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, ' ');
-        // Keep the latest or first seen instance; here we just use the unique normalized title as key
-        if (!uniqueTrendsMap.has(normalizedTitle)) {
-            uniqueTrendsMap.set(normalizedTitle, trend);
+
+        // Simple similarity: if normalized title is already present, increment hit count
+        if (uniqueTrendsMap.has(normalizedTitle)) {
+            const existing = uniqueTrendsMap.get(normalizedTitle)!;
+            existing.count += 1;
+            // Prefer Reddit/HN/Google for metadata if available
+            if (trend.source.includes('Reddit') || trend.source.includes('Hacker News') || trend.source.includes('Google')) {
+                existing.upvotes = (existing.upvotes || 0) + (trend.upvotes || 0);
+                existing.comments = (existing.comments || 0) + (trend.comments || 0);
+            }
+        } else {
+            uniqueTrendsMap.set(normalizedTitle, { ...trend, count: 1 });
         }
     });
 
@@ -40,23 +54,27 @@ export async function processAllTrends(): Promise<TrendTopic[]> {
     const processedTrends: TrendTopic[] = uniqueRawTrends.map(raw => {
         const keywords = extractKeywords(raw.title);
         const category = categorizeTopic(keywords, raw.title);
-        const score = calculateScore(raw.title, raw.source);
+        const score = scoreRawTrend(raw, raw.count);
 
         return {
             title: raw.title,
             keywords,
             category,
             score,
+            upvotes: raw.upvotes || 0,
+            comments: raw.comments || 0,
+            cross_source_hits: raw.count,
             source: raw.source,
             timestamp: raw.published_at || new Date()
         };
     });
 
-    // 4. Rank by score descending
+    // 4. Rank by score descending and take top 100
     processedTrends.sort((a, b) => b.score - a.score);
+    const top100 = processedTrends.slice(0, 100);
 
-    console.log(`[Trend Engine] Processed ${processedTrends.length} unique trends.`);
-    return processedTrends;
+    console.log(`[Trend Engine] Processed ${processedTrends.length} unique trends. Returning top 100.`);
+    return top100;
 }
 
 // Simple keyword extractor
@@ -90,19 +108,74 @@ function categorizeTopic(keywords: string[], title: string): string {
     return 'technology';
 }
 
-// Simple heuristic scoring (0 to 100)
-function calculateScore(title: string, source: string): number {
-    let score = 50; // Base score
+async function fetchHackerNews(): Promise<RawTrend[]> {
+    try {
+        const response = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json');
+        const ids = await response.json();
+        const top50 = ids.slice(0, 50);
 
-    // Give a boost if multiple sources or specific high-signal words are present
-    const lowerTitle = title.toLowerCase();
+        const stories = await Promise.all(top50.map(async (id: number) => {
+            const res = await fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`);
+            return res.json();
+        }));
 
-    if (source.includes('Twitter')) score += 15;
-    if (source.includes('Reddit')) score += 10;
+        return stories.map(s => ({
+            title: s.title,
+            source: 'Hacker News',
+            url: `https://news.ycombinator.com/item?id=${s.id}`,
+            published_at: new Date(s.time * 1000),
+            upvotes: s.score || 0,
+            comments: s.descendants || 0
+        }));
+    } catch (e) {
+        console.error('[Trend Engine] HN fetch failed:', e);
+        return [];
+    }
+}
 
-    if (lowerTitle.includes('launch') || lowerTitle.includes('announce')) score += 20;
-    if (lowerTitle.includes('exclusive') || lowerTitle.includes('break')) score += 15;
-    if (lowerTitle.includes('fail') || lowerTitle.includes('crash')) score += 10;
+async function fetchGoogleTrends(): Promise<RawTrend[]> {
+    try {
+        const parser = new (await import('rss-parser')).default();
+        const feed = await parser.parseURL('https://trends.google.com/trends/trendingsearches/daily/rss?geo=US');
+        return feed.items.map(item => ({
+            title: item.title || 'Unknown Trend',
+            source: 'Google Trends',
+            url: item.link || '',
+            published_at: item.isoDate ? new Date(item.isoDate) : new Date()
+        }));
+    } catch (error) {
+        console.error('[Trend Engine] Google Trends fetch failed:', error);
+        return [];
+    }
+}
 
-    return Math.min(Math.max(score, 0), 100);
+// Advanced Scoring Algorithm: (upvotes * 0.4) + (comments * 0.3) + (cross_source_hits * 0.3)
+export function calculateScore(upvotes: number = 0, comments: number = 0, hits: number = 1): number {
+    const upvotesWeight = 0.4;
+    const commentsWeight = 0.3;
+    const crossSourceWeight = 0.3;
+
+    // Normalize upvotes and comments (roughly)
+    const normUpvotes = Math.min(upvotes / 100, 100);
+    const normComments = Math.min(comments / 50, 100);
+    const normCross = Math.min(hits * 20, 100);
+
+    return (normUpvotes * upvotesWeight) + (normComments * commentsWeight) + (normCross * crossSourceWeight);
+}
+
+// Internal wrapper for RawTrend scoring
+function scoreRawTrend(raw: RawTrend, count: number): number {
+    let score = calculateScore(raw.upvotes || 0, raw.comments || 0, count);
+
+    // Time Decay: decay factor of 0.95 every 4 hours
+    const hoursOld = (Date.now() - (raw.published_at?.getTime() || Date.now())) / (1000 * 60 * 60);
+    const decay = Math.pow(0.95, hoursOld / 4);
+
+    score = score * decay * 100; // Scale to 0-100+
+
+    // Source Boost
+    if (raw.source.includes('Google Trends')) score += 20;
+    if (raw.source.includes('Hacker News')) score += 10;
+
+    return Math.min(Math.max(score, 0), 1000); // Allow high scores for viral content
 }

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export interface FormattedArticle {
     id: string;
@@ -10,70 +10,69 @@ export interface FormattedArticle {
     category: string;
     author: string;
     createdAt: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    keywords?: string[];
 }
 
 function mapDatabaseArticle(article: any): FormattedArticle {
     return {
         id: article.id,
         slug: article.slug,
-        title: article.content?.en?.title || article.title || 'Untitled Report',
-        excerpt: article.content?.en?.excerpt || 'A detailed intelligence report.',
-        bodyHtml: article.content?.en?.body,
-        imageUrl: article.image_url || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80',
-        category: article.category?.name || 'Intelligence',
+        title: article.title || article.content?.en?.title || 'Untitled Report',
+        excerpt: article.excerpt || article.content?.en?.excerpt || 'A detailed intelligence report.',
+        bodyHtml: article.content && typeof article.content === 'string' ? article.content : article.content?.en?.body,
+        imageUrl: article.cover_image || article.image_url || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80',
+        category: article.category || article.category_details?.name || article.category_obj?.name || 'Intelligence',
         author: article.author?.name || 'Vytrixe AI',
         createdAt: new Date(article.created_at).toLocaleDateString(undefined, {
             year: 'numeric',
             month: 'short',
             day: 'numeric'
         }),
+        seoTitle: article.seo_title,
+        seoDescription: article.seo_description,
+        keywords: article.keywords,
     };
 }
 
-export async function getLatestArticles(limit: number = 10): Promise<FormattedArticle[]> {
-    const supabase = await createClient();
+export async function getLatestArticles(limit: number = 20): Promise<FormattedArticle[]> {
+    const supabase = createAdminClient();
     if (!supabase) {
         console.warn("Supabase client not initialized. Returning empty articles.");
         return [];
     }
 
-    // Fetch published articles
+    // Fetch published articles (using published_at as indicator for new engine)
     const { data: articles, error } = await (supabase as any)
         .from('articles')
         .select(`
             *,
             author:authors(name),
-            category:categories(name, slug)
+            category_details:categories(name, slug)
         `)
-        .eq('status', 'published') // Ideally 'published', fallback to all if empty for demo
-        .order('created_at', { ascending: false })
+        .not('published_at', 'is', null) // Only published
+        .order('published_at', { ascending: false })
         .limit(limit);
 
     if (error) {
         console.error("Error fetching latest articles:", error);
-        return [];
-    }
-
-    // Fallback logic for testing: If no published articles, just fetch any non-draft
-    if (!articles || articles.length === 0) {
-        const { data: fallbackArticles } = await (supabase as any)
+        // Fallback: try fetching without joins if they fail
+        const { data: simpleArticles } = await (supabase as any)
             .from('articles')
-            .select(`
-                *,
-                author:authors(name),
-                category:categories(name, slug)
-            `)
-            .order('created_at', { ascending: false })
+            .select('*')
+            .not('published_at', 'is', null)
+            .order('published_at', { ascending: false })
             .limit(limit);
 
-        return (fallbackArticles || []).map(mapDatabaseArticle);
+        return (simpleArticles || []).map(mapDatabaseArticle);
     }
 
-    return articles.map(mapDatabaseArticle);
+    return (articles || []).map(mapDatabaseArticle);
 }
 
 export async function getArticlesByCategory(categorySlug: string, limit: number = 20): Promise<FormattedArticle[]> {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     if (!supabase) {
         console.warn("Supabase client not initialized. Returning empty category articles.");
         return [];
@@ -94,10 +93,11 @@ export async function getArticlesByCategory(categorySlug: string, limit: number 
         .select(`
             *,
             author:authors(name),
-            category:categories(name, slug)
+            category_details:categories(name, slug)
         `)
-        .eq('category_id', categoryData.id)
-        .order('created_at', { ascending: false })
+        .or(`category.eq.${categoryData.name},category_id.eq.${categoryData.id}`)
+        .not('published_at', 'is', null)
+        .order('published_at', { ascending: false })
         .limit(limit);
 
     if (error) {
@@ -109,7 +109,7 @@ export async function getArticlesByCategory(categorySlug: string, limit: number 
 }
 
 export async function getArticleBySlug(slug: string): Promise<FormattedArticle | null> {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     if (!supabase) {
         console.warn("Supabase client not initialized. Returning null article.");
         return null;
@@ -120,7 +120,7 @@ export async function getArticleBySlug(slug: string): Promise<FormattedArticle |
         .select(`
             *,
             author:authors(name, is_ai, bio),
-            category:categories(name, slug)
+            category_details:categories(name, slug)
         `)
         .eq('slug', slug)
         .maybeSingle();

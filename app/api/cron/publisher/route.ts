@@ -1,65 +1,100 @@
 import { NextResponse } from 'next/server';
-import { detectTrends } from '@/lib/trend-engine';
 import { generateArticleFromTrend } from '@/lib/ai-generator';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { revalidatePath } from 'next/cache';
 
-// Note: To secure this route in production, require a Vercel Cron Secret header
-// e.g. req.headers.get('Authorization') === `Bearer ${process.env.CRON_SECRET}`
+export const dynamic = "force-dynamic";
 
-export async function GET(req: Request) {
+export async function GET() {
     try {
-        console.log("[CRON] Publisher initiated.");
+        console.log("[CRON] Autonomous Publisher initiated (Immediate Flow - Admin).");
 
-        // 1. Detect Trends
-        const trends = await detectTrends();
+        // 1. Initialize Admin client to bypass RLS
+        const supabase = createAdminClient();
 
-        if (!trends || trends.length === 0) {
-            return NextResponse.json({ status: "No trends detected." });
+        // 2. Fetch top trends
+        const { data: trends, error: fetchError } = await supabase
+            .from('trends')
+            .select('*')
+            .order('score', { ascending: false })
+            .limit(2);
+
+        if (fetchError || !trends || trends.length === 0) {
+            console.log("[CRON] No trends in queue.");
+            return NextResponse.json({ success: false, status: "No trends in queue.", error: fetchError });
         }
 
-        const topTrend = trends[0];
+        let lastGeneratedTitle = "";
 
-        // 2. Generate Article based on the top trend
-        const articleContent = await generateArticleFromTrend(topTrend.keyword);
+        // 3. Process trends sequentially
+        for (const trend of trends) {
+            try {
+                // Check for existing article
+                const { data: existingTrend } = await (supabase as any)
+                    .from('articles')
+                    .select('id')
+                    .ilike('title', `%${trend.title}%`)
+                    .maybeSingle();
 
-        const supabase = await createClient();
+                if (existingTrend) continue;
 
-        // 3. Save to database (Status: PENDING for review, or PUBLISHED if full auto)
-        // Here we push to the queue
-        const { data: category } = await (supabase as any)
-            .from('categories')
-            .select('id')
-            .eq('slug', articleContent.category)
-            .maybeSingle();
+                // 4. Generate Article
+                const articleData = await generateArticleFromTrend(trend.title);
 
-        const newArticle = {
-            title: articleContent.title,
-            slug: articleContent.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
-            content: {
-                en: {
-                    title: articleContent.title,
-                    body: articleContent.body_html,
-                    excerpt: articleContent.excerpt
+                if (!articleData) continue;
+
+                // 5. Save with Admin Client and immediate 'published_at'
+                const { error: insertError } = await (supabase as any)
+                    .from('articles')
+                    .insert({
+                        title: articleData.title,
+                        slug: articleData.slug,
+                        excerpt: articleData.excerpt,
+                        content: articleData.content,
+                        category: articleData.category,
+                        cover_image: articleData.cover_image,
+                        seo_title: articleData.seo_title,
+                        seo_description: articleData.seo_description,
+                        keywords: articleData.keywords,
+                        structured_data: {
+                            original_trend: trend.title,
+                            score: trend.score,
+                            source: trend.source,
+                            generated_at: new Date().toISOString()
+                        },
+                        published_at: new Date().toISOString(),
+                        created_at: new Date().toISOString()
+                    });
+
+                if (insertError) {
+                    console.error(`[Publisher] Supabase Insert Error:`, insertError.message);
+                    return NextResponse.json({
+                        success: false,
+                        error: insertError.message,
+                        details: insertError
+                    }, { status: 500 });
                 }
-            },
-            category_id: category?.id || null, // Mock category ID if missing
-            status: 'pending', // CMS review needed
-            author_id: 'a123e456-b789-c012-d345-e678f901a23b', // ID of 'AI Agent Delta'
-            image_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200'
-        };
 
-        // Note: This insert assumes the table matches our new schema specs
-        // Error handling removed for brevity of demo stub
-        console.log("[CRON] Content queued for admin review:", newArticle.title);
+                lastGeneratedTitle = articleData.title;
+                console.log(`[Publisher] Successfully published: ${articleData.title}`);
+
+                // 6. Invalidate homepage cache immediately
+                revalidatePath('/');
+                break;
+
+            } catch (err: any) {
+                console.error(`[Publisher] Generation failure:`, err.message);
+                return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+            }
+        }
 
         return NextResponse.json({
             success: true,
-            message: "Automated publishing cycle completed.",
-            queued_item: newArticle.title
+            generated_article: lastGeneratedTitle || "None (Duplicate or Search fail)"
         });
 
     } catch (error: any) {
-        console.error("[CRON Error]", error.message);
+        console.error("[CRON Critical Error]", error.message);
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }

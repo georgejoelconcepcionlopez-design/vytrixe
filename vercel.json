@@ -1,5 +1,15 @@
 {
     "framework": "nextjs",
     "buildCommand": "npm run build",
-    "installCommand": "npm install"
+    "installCommand": "npm install",
+    "crons": [
+        {
+            "path": "/api/cron/trends",
+            "schedule": "*/30 * * * *"
+        },
+        {
+            "path": "/api/cron/publisher",
+            "schedule": "0 * * * *"
+        }
+    ]
 }

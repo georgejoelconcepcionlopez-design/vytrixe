@@ -3,8 +3,10 @@ import Parser from 'rss-parser';
 export interface RawTrend {
     title: string;
     source: string;
-    url: string;
-    published_at: Date;
+    url?: string;
+    published_at?: Date;
+    upvotes?: number;
+    comments?: number;
 }
 
 const parser = new Parser();

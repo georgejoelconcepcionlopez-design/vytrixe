@@ -1,6 +1,6 @@
 import { RawTrend } from './rss-fetcher';
 
-const SUBREDDITS = ['technology', 'artificial', 'CryptoCurrency', 'startups'];
+const SUBREDDITS = ['technology', 'artificial', 'CryptoCurrency', 'startups', 'worldnews'];
 
 export async function fetchRedditTrends(): Promise<RawTrend[]> {
     const trends: RawTrend[] = [];

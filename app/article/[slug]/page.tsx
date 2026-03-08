@@ -8,6 +8,7 @@ import ArticleRenderer from '@/components/ArticleRenderer';
 import { Metadata } from 'next';
 import { getArticleBySlug, getArticlesByCategory } from '@/lib/db';
 import { ArticleCard } from '@/components/article-card';
+import StructuredData from '@/components/StructuredData';
 
 export const revalidate = 60; // Auto update
 
@@ -25,9 +26,13 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
         };
     }
 
+    const title = article.seoTitle || article.title;
+    const description = article.seoDescription || article.excerpt;
+
     return {
-        title: `${article.title} | Vytrixe`,
-        description: article.excerpt,
+        title: `${title} | Vytrixe`,
+        description: description,
+        keywords: article.keywords,
         openGraph: {
             title: article.title,
             description: article.excerpt,
@@ -68,20 +73,20 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
     const categoryArticles = await getArticlesByCategory(article.category);
     const relatedNews = categoryArticles.filter(a => a.slug !== article.slug).slice(0, 3);
 
-    // Schema formatting
-    const structuredData = generateArticleSchema({
-        ...article,
-        datePublished: new Date(article.createdAt).toISOString(),
-        dateModified: new Date(article.createdAt).toISOString(),
-        image: article.imageUrl
-    } as any);
-
     return (
         <main className="min-h-screen bg-background text-foreground font-sans pt-16">
-            {/* Structured Data JSON-LD */}
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+            {/* Structured Data JSON-LD for Google Discover */}
+            <StructuredData
+                article={{
+                    title: article.title,
+                    excerpt: article.excerpt,
+                    content: article.bodyHtml || '',
+                    cover_image: article.imageUrl,
+                    published_at: new Date(article.createdAt).toISOString(),
+                    author: article.author,
+                    category: article.category
+                }}
+                url={`https://vytrixe.com/article/${article.slug}`}
             />
 
             {/* Breadcrumb Navbar */}
